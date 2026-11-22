@@ -1,0 +1,156 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/Icon.astro
+Fungsi: Menyediakan kumpulan ikon vektor bergaya garis teknis permesinan buatan sendiri tanpa library pihak ketiga.
+Boleh diedit: Menambah ikon baru bertema bengkel di daftar IconName dan blok kondisional SVG.
+Jangan diubah: Atribut aria-hidden="true" dan stroke="currentColor" agar warna selalu mengikuti kontras teks induknya.
+Cara mengedit: Tambahkan nama baru di type IconName lalu tambahkan elemen path SVG pada viewBox 24x24.
+*/
+
+export type IconName = 'arrow-right' | 'blueprint' | 'caliper' | 'chevron-down' | 'clock' | 'close' | 'cnc-mill' | 'document' | 'external' | 'gear' | 'mail' | 'map-pin' | 'menu' | 'phone' | 'ruler' | 'wrench';
+
+export interface Props {
+  name: IconName;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 20, class: className = '' } = Astro.props;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  aria-hidden="true"
+  focusable="false"
+  class:list={['icon-svg', className]}
+>
+  {name === 'arrow-right' && (
+    <>
+      <path d="M4 12H19" />
+      <path d="M13 6L19 12L13 18" />
+    </>
+  )}
+
+  {name === 'blueprint' && (
+    <>
+      <rect x="3" y="4" width="18" height="16" />
+      <path d="M3 9H21" />
+      <path d="M8 9V20" />
+      <path d="M12 13H17" />
+      <path d="M12 16H15" />
+    </>
+  )}
+
+  {name === 'caliper' && (
+    <>
+      <path d="M3 10H21" />
+      <path d="M6 10V18L9 15V10" />
+      <path d="M13 10V18L16 15V10" />
+      <path d="M6 10V6L8 7.5V10" />
+      <path d="M13 10V6L15 7.5V10" />
+      <path d="M18 8V12" />
+    </>
+  )}
+
+  {name === 'chevron-down' && <path d="M6 9L12 15L18 9" />}
+
+  {name === 'clock' && (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7V12L15.5 14" />
+    </>
+  )}
+
+  {name === 'close' && (
+    <>
+      <path d="M5 5L19 19" />
+      <path d="M19 5L5 19" />
+    </>
+  )}
+
+  {name === 'cnc-mill' && (
+    <>
+      <path d="M9 3H15V9L12 14L9 9V3Z" />
+      <path d="M9 6.5L15 8.5" />
+      <path d="M4 18H20V21H4V18Z" />
+      <path d="M12 14V18" />
+    </>
+  )}
+
+  {name === 'document' && (
+    <>
+      <path d="M6 3H14L19 8V21H6V3Z" />
+      <path d="M14 3V8H19" />
+      <path d="M9 13H16" />
+      <path d="M9 17H14" />
+    </>
+  )}
+
+  {name === 'external' && (
+    <>
+      <path d="M14 5H19V10" />
+      <path d="M10 14L19 5" />
+      <path d="M19 14V19H5V5H10" />
+    </>
+  )}
+
+  {name === 'gear' && (
+    <>
+      <circle cx="12" cy="12" r="3.5" />
+      <path d="M12 2.5V5M12 19V21.5M2.5 12H5M19 12H21.5M5.3 5.3L7.1 7.1M16.9 16.9L18.7 18.7M18.7 5.3L16.9 7.1M7.1 16.9L5.3 18.7" />
+      <circle cx="12" cy="12" r="7" />
+    </>
+  )}
+
+  {name === 'mail' && (
+    <>
+      <rect x="3" y="5" width="18" height="14" />
+      <path d="M3 7L12 13L21 7" />
+    </>
+  )}
+
+  {name === 'map-pin' && (
+    <>
+      <path d="M12 21C12 21 18.5 14.8 18.5 10C18.5 6.4 15.6 3.5 12 3.5C8.4 3.5 5.5 6.4 5.5 10C5.5 14.8 12 21 12 21Z" />
+      <circle cx="12" cy="10" r="2.2" />
+    </>
+  )}
+
+  {name === 'menu' && (
+    <>
+      <path d="M4 7H20" />
+      <path d="M4 12H20" />
+      <path d="M4 17H14" />
+    </>
+  )}
+
+  {name === 'phone' && (
+    <path d="M6.5 3.5H10L11.5 8L9.2 9.6C10.3 11.9 12.1 13.7 14.4 14.8L16 12.5L20.5 14V17.5C20.5 19.2 19.1 20.5 17.4 20.5C10 20.1 3.9 14 3.5 6.6C3.5 4.9 4.8 3.5 6.5 3.5Z" />
+  )}
+
+  {name === 'ruler' && (
+    <>
+      <rect x="3" y="8" width="18" height="8" />
+      <path d="M7 8V12M11 8V11M15 8V12M19 8V11" />
+    </>
+  )}
+
+  {name === 'wrench' && (
+    <path d="M14.8 5.2A4.5 4.5 0 0 0 9.6 11.4L4.2 16.8A1.8 1.8 0 1 0 6.8 19.4L12.2 14A4.5 4.5 0 0 0 18.4 8.8L15.8 11.4L13.6 9.2L16.2 6.6A4.5 4.5 0 0 0 14.8 5.2Z" />
+  )}
+</svg>
+
+<style>
+  .icon-svg {
+    flex-shrink: 0;
+  }
+</style>

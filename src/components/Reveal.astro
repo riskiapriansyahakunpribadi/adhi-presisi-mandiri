@@ -1,0 +1,26 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/Reveal.astro
+Fungsi: Pembungkus elemen yang muncul halus satu kali saat masuk ke area pandang layar.
+Boleh diedit: Tidak perlu diubah untuk penggunaan harian.
+Jangan diubah: Kelas .reveal-item dan batas data-delay 0 sampai 4 agar selaras dengan global.css dan site.ts.
+Cara mengedit: Gunakan prop delay (0 sampai 4) saat memanggil komponen ini di halaman.
+*/
+
+export interface Props {
+  delay?: 0 | 1 | 2 | 3 | 4;
+  as?: 'div' | 'article' | 'li' | 'section';
+  class?: string;
+}
+
+const { delay = 0, as = 'div', class: className = '' } = Astro.props;
+const Tag = as;
+---
+
+<Tag
+  class:list={['reveal-item', className]}
+  data-delay={delay > 0 ? String(delay) : undefined}
+>
+  <slot />
+</Tag>

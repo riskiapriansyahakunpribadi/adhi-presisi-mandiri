@@ -1,0 +1,424 @@
+---
+/*
+PANDUAN EDIT
+File: src/templates/CapabilitiesPage.astro
+Fungsi: Template halaman daftar Kapabilitas versi bahasa Indonesia dan Inggris menampilkan 4 kapabilitas inti bengkel beserta ringkasan komponen dan materialnya.
+Boleh diedit: Proporsi grid kartu atau jarak antarbagian di blok style.
+Jangan diubah: Pengecekan kondisi kosong capabilitiesData.length === 0, urutan heading (h1 -> h2 -> h3), dan tautan pintasan ke formulir penawaran (?need=).
+Cara mengedit: Ubah isi masing-masing kapabilitas di src/data/capabilities.ts dan teks pengantar halaman di src/i18n/id.ts serta src/i18n/en.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+import MediaFrame from '../components/MediaFrame.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+import { capabilitiesData, getCapabilityHref } from '../data/capabilities';
+import type { Lang } from '../i18n/routes';
+import { getCopy, getRoute } from '../i18n/utils';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const copy = getCopy(lang);
+const pageCopy = copy.pages.capabilities;
+
+const quoteHref = getRoute('quote', lang);
+const industriesHref = getRoute('industries', lang);
+const faqHref = getRoute('faq', lang);
+
+// EDIT: Teks label khusus halaman daftar kapabilitas.
+const labels =
+  lang === 'id'
+    ? {
+        industriesCta: 'Lihat sektor industri',
+        partsLabel: 'Contoh komponen',
+        materialsLabel: 'Material dan penanganan',
+        quoteThisCta: 'Minta penawaran kategori ini',
+        prepHeading: 'Sebelum mengirim gambar teknik',
+        prepIntro:
+          'Tim engineering kami memeriksa kesanggupan toleransi, ketersediaan material, dan perkiraan jadwal kerja saat meninjau gambar Anda.',
+        prepCards: [
+          {
+            title: 'Format gambar yang siap diproses',
+            body: 'File 3D STEP atau IGES sangat membantu pemrograman CNC. Sertakan juga gambar 2D PDF, DWG, atau DXF agar catatan ulir dan dimensi kritis terbaca jelas.',
+          },
+          {
+            title: 'Pesanan satuan hingga batch berulang',
+            body: 'Kami menerima pengerjaan satu unit prototipe, jig khusus, maupun suku cadang darurat hingga pesanan batch kecil dan menengah.',
+          },
+          {
+            title: 'Sampel fisik tanpa gambar lama',
+            body: 'Jika dokumen teknis mesin sudah tidak tersedia, tim kami dapat mengukur komponen fisik Anda di bengkel Cikarang untuk dibuatkan gambar kerja baru.',
+          },
+        ],
+        faqCta: 'Baca pertanyaan teknis (FAQ)',
+      }
+    : {
+        industriesCta: 'View industries served',
+        partsLabel: 'Typical parts',
+        materialsLabel: 'Materials and scope',
+        quoteThisCta: 'Quote this capability',
+        prepHeading: 'Before sending your engineering drawing',
+        prepIntro:
+          'Our engineering team confirms tolerance feasibility, stock availability, and production schedule in writing when reviewing your drawing.',
+        prepCards: [
+          {
+            title: 'Ready-to-review drawing formats',
+            body: '3D STEP or IGES files speed up CNC programming. Pair them with a 2D PDF, DWG, or DXF drawing so threads and critical fits are unmistakable.',
+          },
+          {
+            title: 'Single prototypes to repeat batches',
+            body: 'We machine one-off prototypes, custom assembly fixtures, and urgent spare parts as well as small and medium repeat production runs.',
+          },
+          {
+            title: 'Physical samples without old drawings',
+            body: 'When original machine documentation is missing, our engineers measure your worn part at our Cikarang workshop to draft a confirmation drawing.',
+          },
+        ],
+        faqCta: 'Read technical FAQ',
+      };
+---
+
+<BaseLayout lang={lang} title={pageCopy.title} description={pageCopy.description}>
+  <section class="page-hero surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="page-hero__inner">
+        <h1 class="page-hero__title">{pageCopy.heading}</h1>
+        <p class="page-hero__intro">{pageCopy.intro}</p>
+        <div class="page-hero__actions">
+          <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+            {copy.common.requestQuote}
+          </Button>
+          <Button href={industriesHref} variant="outline" surface="dark">
+            {labels.industriesCta}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-light">
+    <div class="container">
+      {capabilitiesData.length === 0 ? (
+        <div class="empty-state">
+          <h2>{copy.common.emptyListTitle}</h2>
+          <p>{copy.common.emptyListBody}</p>
+        </div>
+      ) : (
+        <div class="cap-list">
+          {capabilitiesData.map((item, idx) => {
+            const loc = item.content[lang];
+            const detailHref = getCapabilityHref(item, lang);
+            const prefillQuoteHref = `${quoteHref}?need=${encodeURIComponent(item.quoteParam)}`;
+            const delay = Math.min(idx, 3);
+
+            return (
+              <article
+                class="cap-panel reveal-item"
+                data-delay={delay > 0 ? String(delay) : undefined}
+              >
+                <a href={detailHref} class="cap-panel__media" aria-label={loc.title}>
+                  <MediaFrame
+                    slotId={item.imageSlot}
+                    lang={lang}
+                    ratio={idx === 0 ? '16/10' : '4/3'}
+                    sizes="(max-width: 960px) 100vw, 44vw"
+                    eager={idx === 0}
+                    hoverZoom
+                    rounded="none"
+                  />
+                </a>
+
+                <div class="cap-panel__body">
+                  <div class="cap-panel__header">
+                    <span class="cap-panel__tag">{loc.shortTag}</span>
+                    <h2 class="cap-panel__title">
+                      <a href={detailHref} class="cap-panel__title-link">
+                        {loc.title}
+                      </a>
+                    </h2>
+                    <p class="cap-panel__overview">{loc.overview}</p>
+                  </div>
+
+                  <div class="cap-panel__specs">
+                    <div class="cap-spec-col">
+                      <h3 class="cap-spec-col__heading">{labels.partsLabel}</h3>
+                      <ul class="cap-spec-col__list">
+                        {loc.typicalParts.slice(0, 3).map((part) => (
+                          <li>{part}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div class="cap-spec-col">
+                      <h3 class="cap-spec-col__heading">{labels.materialsLabel}</h3>
+                      <ul class="cap-spec-col__list">
+                        {loc.materials.slice(0, 3).map((mat) => (
+                          <li>{mat}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="cap-panel__actions">
+                    <Button href={detailHref} variant="outline" surface="light">
+                      {copy.common.viewCapabilityDetail}
+                    </Button>
+                    <Button href={prefillQuoteHref} variant="secondary" surface="light">
+                      {labels.quoteThisCta}
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section surface-dark-alt" data-theme="dark">
+    <div class="container">
+      <SectionHeading
+        heading={labels.prepHeading}
+        intro={labels.prepIntro}
+        surface="dark"
+        align="split"
+      />
+
+      <div class="prep-grid">
+        {labels.prepCards.map((card, idx) => {
+          const delay = Math.min(idx, 2);
+          return (
+            <article
+              class="prep-card reveal-item"
+              data-delay={delay > 0 ? String(delay) : undefined}
+            >
+              <h3 class="prep-card__title">{card.title}</h3>
+              <p class="prep-card__body">{card.body}</p>
+            </article>
+          );
+        })}
+      </div>
+
+      <CaliperDivider surface="dark" class="prep-divider" />
+
+      <div class="prep-actions">
+        <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+          {copy.common.requestQuote}
+        </Button>
+        <Button href={faqHref} variant="secondary" surface="dark">
+          {labels.faqCta}
+        </Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: calc(var(--header-height) + clamp(3rem, 7vw, 5.25rem));
+    padding-bottom: clamp(3rem, 6vw, 4.75rem);
+  }
+
+  .page-hero__inner {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 58rem;
+  }
+
+  .page-hero__title {
+    color: var(--color-text-light);
+    max-width: 22ch;
+  }
+
+  .page-hero__intro {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 58ch;
+  }
+
+  .page-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-top: var(--space-2);
+  }
+
+  .empty-state {
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-light-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-light);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .cap-list {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .cap-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .cap-panel {
+      grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    }
+  }
+
+  .cap-panel__media {
+    display: block;
+    background-color: var(--color-surface-dark);
+  }
+
+  .cap-panel__media :global(.media-frame) {
+    height: 100%;
+    border: 0;
+  }
+
+  .cap-panel__body {
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+
+  .cap-panel__header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .cap-panel__tag {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-accent-on-light);
+  }
+
+  .cap-panel__title {
+    font-size: var(--text-2xl);
+    color: var(--color-text-dark);
+  }
+
+  .cap-panel__title-link {
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .cap-panel__title-link:hover {
+      color: var(--color-accent-on-light);
+    }
+  }
+
+  .cap-panel__overview {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .cap-panel__specs {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  @media (min-width: 680px) {
+    .cap-panel__specs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+  }
+
+  .cap-spec-col {
+    display: grid;
+    gap: 0.65rem;
+    align-content: start;
+  }
+
+  .cap-spec-col__heading {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark);
+  }
+
+  .cap-spec-col__list {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: grid;
+    gap: 0.45rem;
+    font-size: var(--text-xs);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .cap-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem 1.4rem;
+  }
+
+  .prep-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .prep-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1080px) {
+    .prep-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .prep-card {
+    padding: clamp(1.4rem, 2.8vw, 2rem);
+    background-color: var(--color-bg-dark);
+    border: 1px solid var(--color-border-dark);
+    border-top: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+
+  .prep-card__title {
+    font-size: var(--text-lg);
+    color: var(--color-text-light);
+  }
+
+  .prep-card__body {
+    font-size: var(--text-sm);
+    color: var(--color-text-light-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .prep-divider {
+    margin-block: var(--space-7) var(--space-6);
+  }
+
+  .prep-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.75rem;
+  }
+</style>

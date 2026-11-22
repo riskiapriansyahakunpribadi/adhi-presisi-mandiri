@@ -1,0 +1,85 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/SectionHeading.astro
+Fungsi: Menampilkan judul utama halaman dan judul setiap bagian secara langsung tanpa penomoran atau ikon garis tambahan.
+Boleh diedit: Jarak bawah (margin-bottom) atau lebar maksimum paragraf pengantar.
+Jangan diubah: Properti level ('h1' | 'h2' | 'h3') agar urutan heading halaman selalu berurutan tanpa loncatan.
+Cara mengedit: Sesuaikan ukuran atau jarak di blok style komponen ini.
+*/
+
+export interface Props {
+  heading: string;
+  intro?: string;
+  level?: 'h1' | 'h2' | 'h3';
+  surface?: 'dark' | 'light';
+  align?: 'left' | 'split';
+  class?: string;
+}
+
+const {
+  heading,
+  intro,
+  level = 'h2',
+  surface = 'light',
+  align = 'left',
+  class: className = '',
+} = Astro.props;
+
+const HeadingTag = level;
+---
+
+<header
+  class:list={[
+    'section-heading',
+    `section-heading--${surface}`,
+    `section-heading--${align}`,
+    className,
+  ]}
+>
+  <div class="section-heading__main">
+    <HeadingTag class="section-heading__title">{heading}</HeadingTag>
+  </div>
+
+  {intro && <p class="section-heading__intro">{intro}</p>}
+</header>
+
+<style>
+  .section-heading {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-7);
+  }
+
+  .section-heading--split {
+    grid-template-columns: 1fr;
+    align-items: end;
+  }
+
+  @media (min-width: 900px) {
+    .section-heading--split {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+      gap: var(--space-6);
+    }
+  }
+
+  .section-heading__main {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .section-heading__title {
+    max-width: 24ch;
+  }
+
+  .section-heading__intro {
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: var(--color-text-dark-muted);
+    max-width: 56ch;
+  }
+
+  .section-heading--dark .section-heading__intro {
+    color: var(--color-text-light-muted);
+  }
+</style>

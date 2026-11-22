@@ -1,0 +1,12 @@
+# PANDUAN EDIT
+# File: public/robots.txt
+# Fungsi: Memberi tahu mesin pencari halaman mana yang boleh diindeks dan lokasi file sitemap.
+# Boleh diedit: Alamat URL pada baris Sitemap.
+# Jangan diubah: Baris User-agent dan Allow agar seluruh halaman publik dapat diindeks.
+# Cara mengedit: Ganti https://isi-domain-anda.example dengan domain asli Anda.
+
+User-agent: *
+Allow: /
+
+# EDIT: Ganti domain di bawah agar sama dengan SITE_URL pada astro.config.mjs.
+Sitemap: https://isi-domain-anda.example/sitemap-index.xml

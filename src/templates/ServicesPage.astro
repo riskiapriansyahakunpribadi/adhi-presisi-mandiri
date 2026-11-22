@@ -1,0 +1,304 @@
+---
+/*
+PANDUAN EDIT
+File: src/templates/ServicesPage.astro
+Fungsi: Template halaman daftar Layanan untuk versi Indonesia dan Inggris lengkap dengan ringkasan ruang lingkup tiap layanan dan garis waktu alur kerja.
+Boleh diedit: Susunan jarak antarbaris layanan pada blok style.
+Jangan diubah: Pengecekan kondisi kosong servicesData.length === 0 serta semantik heading berurutan (h1 -> h2 -> h3).
+Cara mengedit: Ubah isi layanan di src/data/services.ts dan judul halaman di src/i18n/id.ts serta src/i18n/en.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+import MediaFrame from '../components/MediaFrame.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import WorkflowRuler from '../components/WorkflowRuler.astro';
+
+import { getServiceHref, servicesData } from '../data/services';
+import type { Lang } from '../i18n/routes';
+import { getCopy, getRoute } from '../i18n/utils';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const copy = getCopy(lang);
+const pageCopy = copy.pages.services;
+const quoteHref = getRoute('quote', lang);
+const capabilitiesHref = getRoute('capabilities', lang);
+---
+
+<BaseLayout lang={lang} title={pageCopy.title} description={pageCopy.description}>
+  <section class="page-hero surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="page-hero__inner">
+        <h1 class="page-hero__title">{pageCopy.heading}</h1>
+        <p class="page-hero__intro">{pageCopy.intro}</p>
+        <div class="page-hero__actions">
+          <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+            {copy.common.requestQuote}
+          </Button>
+          <Button href={capabilitiesHref} variant="outline" surface="dark">
+            {copy.common.viewCapabilities}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-light">
+    <div class="container">
+      {servicesData.length === 0 ? (
+        <div class="empty-state">
+          <h2>{copy.common.emptyListTitle}</h2>
+          <p>{copy.common.emptyListBody}</p>
+        </div>
+      ) : (
+        <div class="services-catalog">
+          {servicesData.map((service, idx) => {
+            const loc = service.content[lang];
+            const href = getServiceHref(service, lang);
+            const reversed = idx % 2 === 1;
+            const delay = Math.min(idx, 3);
+
+            return (
+              <article
+                class:list={[
+                  'service-feature',
+                  reversed ? 'service-feature--reversed' : '',
+                  'reveal-item',
+                ]}
+                data-delay={delay > 0 ? String(delay) : undefined}
+              >
+                <a href={href} class="service-feature__media" aria-label={loc.title}>
+                  <MediaFrame
+                    slotId={service.imageSlot}
+                    lang={lang}
+                    ratio="4/3"
+                    sizes="(max-width: 960px) 100vw, 46vw"
+                    eager={idx === 0}
+                    hoverZoom
+                    rounded="sm"
+                  />
+                </a>
+
+                <div class="service-feature__body">
+                  <h2 class="service-feature__title">
+                    <a href={href} class="service-feature__title-link">
+                      {loc.title}
+                    </a>
+                  </h2>
+
+                  <p class="service-feature__overview">{loc.overview}</p>
+
+                  <ul class="service-feature__highlights">
+                    {loc.scopeItems.slice(0, 3).map((point) => (
+                      <li>{point}</li>
+                    ))}
+                  </ul>
+
+                  <div class="service-feature__actions">
+                    <Button href={href} variant="outline" surface="light">
+                      {copy.common.viewServiceDetail}
+                    </Button>
+                    <Button href={quoteHref} variant="secondary" surface="light">
+                      {copy.common.requestQuote}
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section surface-paper">
+    <div class="container">
+      <CaliperDivider surface="light" class="services-workflow__divider" />
+
+      <SectionHeading
+        heading={copy.home.workflowSection.heading}
+        intro={copy.home.workflowSection.intro}
+        surface="light"
+        align="split"
+      />
+
+      <WorkflowRuler steps={copy.home.workflowSection.steps} />
+    </div>
+  </section>
+
+  <section class="section surface-dark-alt" data-theme="dark">
+    <div class="container">
+      <div class="services-cta">
+        <div class="services-cta__copy">
+          <h2 class="services-cta__title">{copy.home.quoteBanner.heading}</h2>
+          <p class="services-cta__body">{copy.home.quoteBanner.body}</p>
+        </div>
+        <div class="services-cta__action">
+          <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+            {copy.home.quoteBanner.cta}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: calc(var(--header-height) + clamp(3rem, 7vw, 5.25rem));
+    padding-bottom: clamp(3rem, 6vw, 4.75rem);
+  }
+
+  .page-hero__inner {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 58rem;
+  }
+
+  .page-hero__title {
+    color: var(--color-text-light);
+    max-width: 22ch;
+  }
+
+  .page-hero__intro {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 58ch;
+  }
+
+  .page-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-top: var(--space-2);
+  }
+
+  .empty-state {
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-light-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-light);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .services-catalog {
+    display: grid;
+    gap: clamp(3rem, 6vw, 5.25rem);
+  }
+
+  .service-feature {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: center;
+    padding-bottom: clamp(2.5rem, 5vw, 4.25rem);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .service-feature:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  @media (min-width: 960px) {
+    .service-feature {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+      gap: var(--space-8);
+    }
+
+    .service-feature--reversed .service-feature__media {
+      order: 2;
+    }
+
+    .service-feature--reversed .service-feature__body {
+      order: 1;
+    }
+  }
+
+  .service-feature__media {
+    display: block;
+  }
+
+  .service-feature__body {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+
+  .service-feature__title {
+    font-size: var(--text-2xl);
+    color: var(--color-text-dark);
+  }
+
+  .service-feature__title-link {
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .service-feature__title-link:hover {
+      color: var(--color-accent-on-light);
+    }
+  }
+
+  .service-feature__overview {
+    color: var(--color-text-dark-muted);
+    font-size: var(--text-base);
+  }
+
+  .service-feature__highlights {
+    list-style: none;
+    display: grid;
+    gap: 0.65rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-border-light-strong);
+    font-size: var(--text-sm);
+    color: var(--color-text-dark);
+  }
+
+  .service-feature__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem 1.4rem;
+    padding-top: var(--space-2);
+  }
+
+  .services-workflow__divider {
+    margin-bottom: var(--space-7);
+  }
+
+  .services-cta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  @media (min-width: 840px) {
+    .services-cta {
+      grid-template-columns: minmax(0, 1.3fr) auto;
+      gap: var(--space-6);
+    }
+  }
+
+  .services-cta__copy {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .services-cta__title {
+    color: var(--color-text-light);
+    max-width: 24ch;
+  }
+
+  .services-cta__body {
+    color: var(--color-text-light-muted);
+    max-width: 56ch;
+  }
+</style>

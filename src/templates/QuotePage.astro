@@ -1,0 +1,87 @@
+---
+/*
+PANDUAN EDIT
+File: src/templates/QuotePage.astro
+Fungsi: Template halaman Permintaan Penawaran versi bahasa Indonesia dan Inggris yang memuat pengantar, komponen QuoteForm, dan garis waktu alur kerja.
+Boleh diedit: Jarak vertikal antarbagian di blok style.
+Jangan diubah: Urutan heading (h1 pada hero, h2 pada panel dan alur kerja) serta pemanggilan QuoteForm.
+Cara mengedit: Ubah teks pengantar halaman di pages.quote dan quoteForm pada src/i18n/id.ts dan src/i18n/en.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+import QuoteForm from '../components/QuoteForm.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import WorkflowRuler from '../components/WorkflowRuler.astro';
+
+import type { Lang } from '../i18n/routes';
+import { getCopy } from '../i18n/utils';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const copy = getCopy(lang);
+const pageCopy = copy.pages.quote;
+---
+
+<BaseLayout lang={lang} title={pageCopy.title} description={pageCopy.description}>
+  <section class="page-hero surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="page-hero__inner">
+        <h1 class="page-hero__title">{pageCopy.heading}</h1>
+        <p class="page-hero__intro">{pageCopy.intro}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-light">
+    <div class="container">
+      <QuoteForm lang={lang} />
+    </div>
+  </section>
+
+  <section class="section surface-paper">
+    <div class="container">
+      <CaliperDivider surface="light" class="quote-workflow__divider" />
+
+      <SectionHeading
+        heading={copy.home.workflowSection.heading}
+        intro={copy.home.workflowSection.intro}
+        surface="light"
+        align="split"
+      />
+
+      <WorkflowRuler steps={copy.home.workflowSection.steps} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: calc(var(--header-height) + clamp(3rem, 7vw, 5.25rem));
+    padding-bottom: clamp(2.75rem, 5.5vw, 4.25rem);
+  }
+
+  .page-hero__inner {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 58rem;
+  }
+
+  .page-hero__title {
+    color: var(--color-text-light);
+    max-width: 22ch;
+  }
+
+  .page-hero__intro {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 60ch;
+  }
+
+  .quote-workflow__divider {
+    margin-bottom: var(--space-7);
+  }
+</style>

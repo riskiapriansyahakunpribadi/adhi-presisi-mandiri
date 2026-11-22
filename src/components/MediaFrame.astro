@@ -1,0 +1,332 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/MediaFrame.astro
+Fungsi: Menampilkan gambar lokal teroptimasi (jika ada di src/assets/images/), atau gambar Unsplash responsif, dengan cadangan placeholder grafit otomatis bila gambar gagal dimuat.
+Boleh diedit: Warna latar placeholder atau sudut tanda registrasi di blok style.
+Jangan diubah: Atribut width, height, fetchpriority="high" pada gambar hero, dan data-remote-img yang ditangani oleh src/scripts/site.ts.
+Cara mengedit: Ganti tautan foto melalui src/data/images.ts atau taruh file lokal di src/assets/images/ dengan nama sama seperti slotId.
+*/
+
+import { Image } from 'astro:assets';
+import {
+  buildUnsplashSrc,
+  resolveImageSlot,
+  type ImageSlotId,
+} from '../data/images';
+import type { Lang } from '../i18n/routes';
+import { getCopy } from '../i18n/utils';
+
+export interface Props {
+  slotId: ImageSlotId;
+  lang: Lang;
+  ratio?: '16/9' | '16/10' | '4/3' | '3/4' | '3/2' | 'fill';
+  sizes?: string;
+  eager?: boolean;
+  hoverZoom?: boolean;
+  registrationMarks?: boolean;
+  scrim?: 'none' | 'soft' | 'strong';
+  rounded?: 'none' | 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  slotId,
+  lang,
+  ratio,
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 720px',
+  eager = false,
+  hoverZoom = false,
+  registrationMarks = true,
+  scrim = 'none',
+  rounded = 'sm',
+  class: className = '',
+} = Astro.props;
+
+const { meta, asset } = resolveImageSlot(slotId);
+const copy = getCopy(lang);
+const altText = meta.alt[lang];
+const resolvedRatio =
+  ratio ?? (meta.aspectRatio.replace(/\s+/g, '') as NonNullable<Props['ratio']>);
+
+const hasRemote = Boolean(meta.remoteUrl && meta.remoteUrl.startsWith('https://'));
+const remoteSrc = hasRemote ? buildUnsplashSrc(meta.remoteUrl, 1200) : '';
+const remoteSrcSet = hasRemote
+  ? [
+      `${buildUnsplashSrc(meta.remoteUrl, 640)} 640w`,
+      `${buildUnsplashSrc(meta.remoteUrl, 1080)} 1080w`,
+      `${buildUnsplashSrc(meta.remoteUrl, 1600)} 1600w`,
+    ].join(', ')
+  : '';
+---
+
+<div
+  class:list={[
+    'media-frame',
+    `media-frame--radius-${rounded}`,
+    hoverZoom ? 'media-frame--zoom' : '',
+    scrim !== 'none' ? `media-frame--scrim-${scrim}` : '',
+    className,
+  ]}
+  data-ratio={resolvedRatio}
+>
+  {asset ? (
+    <Image
+      src={asset}
+      alt={altText}
+      widths={[480, 768, 1200, 1600]}
+      sizes={sizes}
+      format="webp"
+      quality={82}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding={eager ? 'sync' : 'async'}
+      fetchpriority={eager ? 'high' : undefined}
+      class="media-frame__img"
+    />
+  ) : hasRemote ? (
+    <>
+      <img
+        src={remoteSrc}
+        srcset={remoteSrcSet}
+        sizes={sizes}
+        width={meta.width}
+        height={meta.height}
+        alt={altText}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding={eager ? 'sync' : 'async'}
+        fetchpriority={eager ? 'high' : undefined}
+        referrerpolicy="no-referrer"
+        data-remote-img
+        class="media-frame__img"
+      />
+      <div
+        class="media-frame__placeholder media-frame__placeholder--fallback"
+        data-img-fallback
+        hidden
+      >
+        <div class="media-frame__placeholder-inner">
+          <span class="media-frame__slot-label">
+            {copy.common.placeholderImagePrefix}: {meta.id}
+          </span>
+          <span class="media-frame__slot-size">
+            {copy.common.placeholderSizePrefix}: {meta.minSizeLabel}
+          </span>
+        </div>
+      </div>
+    </>
+  ) : (
+    <div
+      class="media-frame__placeholder"
+      role="img"
+      aria-label={`${copy.common.placeholderImagePrefix}: ${meta.id}. ${altText}`}
+    >
+      <div class="media-frame__placeholder-inner">
+        <span class="media-frame__slot-label">
+          {copy.common.placeholderImagePrefix}: {meta.id}
+        </span>
+        <span class="media-frame__slot-size">
+          {copy.common.placeholderSizePrefix}: {meta.minSizeLabel}
+        </span>
+      </div>
+    </div>
+  )}
+
+  {scrim !== 'none' && <div class="media-frame__scrim" aria-hidden="true"></div>}
+
+  {registrationMarks && (
+    <div class="media-frame__marks" aria-hidden="true">
+      <span class="media-frame__corner media-frame__corner--tl"></span>
+      <span class="media-frame__corner media-frame__corner--tr"></span>
+      <span class="media-frame__corner media-frame__corner--bl"></span>
+      <span class="media-frame__corner media-frame__corner--br"></span>
+    </div>
+  )}
+
+  <span class="media-frame__edge-line" aria-hidden="true"></span>
+</div>
+
+<style>
+  .media-frame {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--color-surface-dark);
+    border: 1px solid var(--color-border-dark);
+  }
+
+  .media-frame--radius-none {
+    border-radius: 0;
+  }
+
+  .media-frame--radius-sm {
+    border-radius: var(--radius-sm);
+  }
+
+  .media-frame--radius-md {
+    border-radius: var(--radius-md);
+  }
+
+  .media-frame[data-ratio='16/9'] {
+    aspect-ratio: 16 / 9;
+  }
+
+  .media-frame[data-ratio='16/10'] {
+    aspect-ratio: 16 / 10;
+  }
+
+  .media-frame[data-ratio='4/3'] {
+    aspect-ratio: 4 / 3;
+  }
+
+  .media-frame[data-ratio='3/4'] {
+    aspect-ratio: 3 / 4;
+  }
+
+  .media-frame[data-ratio='3/2'] {
+    aspect-ratio: 3 / 2;
+  }
+
+  .media-frame[data-ratio='fill'] {
+    height: 100%;
+    min-height: 100%;
+    border: 0;
+  }
+
+  .media-frame__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-standard);
+  }
+
+  .media-frame__img[hidden] {
+    display: none;
+  }
+
+  .media-frame__placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    padding: var(--space-5);
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-light);
+    text-align: center;
+  }
+
+  .media-frame__placeholder--fallback[hidden] {
+    display: none;
+  }
+
+  .media-frame__placeholder-inner {
+    display: grid;
+    gap: 0.4rem;
+    max-width: 34ch;
+  }
+
+  .media-frame__slot-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    color: var(--color-text-light);
+    word-break: break-word;
+  }
+
+  .media-frame__slot-size {
+    font-size: var(--text-xs);
+    color: var(--color-text-light-muted);
+  }
+
+  .media-frame__scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .media-frame--scrim-soft .media-frame__scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(18, 22, 27, 0.28) 0%,
+      rgba(18, 22, 27, 0.72) 100%
+    );
+  }
+
+  .media-frame--scrim-strong .media-frame__scrim {
+    background: linear-gradient(
+      95deg,
+      rgba(18, 22, 27, 0.9) 0%,
+      rgba(18, 22, 27, 0.74) 55%,
+      rgba(18, 22, 27, 0.48) 100%
+    );
+  }
+
+  .media-frame__marks {
+    position: absolute;
+    inset: 0.65rem;
+    pointer-events: none;
+  }
+
+  .media-frame__corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: rgba(244, 242, 238, 0.42);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .media-frame__corner--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+  }
+
+  .media-frame__corner--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 1.5px;
+    border-right-width: 1.5px;
+  }
+
+  .media-frame__corner--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1.5px;
+    border-left-width: 1.5px;
+  }
+
+  .media-frame__corner--br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 1.5px;
+    border-right-width: 1.5px;
+  }
+
+  .media-frame__edge-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-slow) var(--ease-standard);
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .media-frame--zoom:hover .media-frame__img,
+    a:hover .media-frame--zoom .media-frame__img {
+      transform: scale(1.04);
+    }
+
+    .media-frame--zoom:hover .media-frame__edge-line,
+    a:hover .media-frame--zoom .media-frame__edge-line {
+      transform: scaleX(1);
+    }
+  }
+</style>

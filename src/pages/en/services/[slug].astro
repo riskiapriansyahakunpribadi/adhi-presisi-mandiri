@@ -1,0 +1,28 @@
+---
+/*
+PANDUAN EDIT
+File: src/pages/en/services/[slug].astro
+Fungsi: Membangun 4 halaman statis detail Services bahasa Inggris (/en/services/<slug>/) secara otomatis dari src/data/services.ts.
+Boleh diedit: Tidak perlu diubah untuk menyunting konten layanan.
+Jangan diubah: Fungsi getStaticPaths agar Astro menghasilkan seluruh halaman detail layanan secara statis.
+Cara mengedit: Ubah atau tambah layanan melalui src/data/services.ts (dan daftarkan slug baru di src/i18n/routes.ts).
+*/
+
+import ServiceDetailPage from '../../../templates/ServiceDetailPage.astro';
+import { servicesData, type ServiceItem } from '../../../data/services';
+
+export function getStaticPaths() {
+  return servicesData.map((service) => ({
+    params: { slug: service.slug.en },
+    props: { service },
+  }));
+}
+
+interface Props {
+  service: ServiceItem;
+}
+
+const { service } = Astro.props;
+---
+
+<ServiceDetailPage lang="en" service={service} />

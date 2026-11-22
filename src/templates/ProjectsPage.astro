@@ -1,0 +1,388 @@
+---
+/*
+PANDUAN EDIT
+File: src/templates/ProjectsPage.astro
+Fungsi: Template halaman Proyek versi bahasa Indonesia dan Inggris berisi contoh ilustrasi pekerjaan bengkel tanpa nama klien maupun angka karangan.
+Boleh diedit: Susunan kartu atau jarak antarbagian di blok style.
+Jangan diubah: Kotak pemberitahuan keterbukaan portofolio (notice) dan lencana contoh ilustrasi pada setiap kartu agar proyek tetap jujur.
+Cara mengedit: Ubah daftar contoh pekerjaan pada src/data/projects.ts dan teks pengantar halaman pada pages.projects di src/i18n/id.ts dan src/i18n/en.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+import MediaFrame from '../components/MediaFrame.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+import { projectsData } from '../data/projects';
+import type { Lang } from '../i18n/routes';
+import { getCopy, getRoute } from '../i18n/utils';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const copy = getCopy(lang);
+const pageCopy = copy.pages.projects;
+
+const quoteHref = getRoute('quote', lang);
+const capabilitiesHref = getRoute('capabilities', lang);
+
+// EDIT: Label rincian spesifikasi contoh pekerjaan pada halaman Proyek.
+const labels =
+  lang === 'id'
+    ? {
+        materialLabel: 'Material contoh',
+        processLabel: 'Proses pengerjaan',
+        sectorLabel: 'Sektor terkait',
+        focusLabel: 'Titik perhatian di bengkel',
+        similarCta: 'Ajukan penawaran pekerjaan serupa',
+        ctaHeading: 'Punya gambar teknik komponen yang ingin dikerjakan?',
+        ctaBody:
+          'Kirim gambar teknik atau rincian sampel fisik Anda. Tim engineering kami meninjau kebutuhan dan mengirim penawaran tertulis pada jam kerja.',
+      }
+    : {
+        materialLabel: 'Example material',
+        processLabel: 'Machining process',
+        sectorLabel: 'Related sector',
+        focusLabel: 'Workshop checkpoints',
+        similarCta: 'Request quote for similar work',
+        ctaHeading: 'Have a component drawing ready for review?',
+        ctaBody:
+          'Send your drawing files or physical sample details. Our engineering team reviews your specification and prepares a written quote during business hours.',
+      };
+---
+
+<BaseLayout lang={lang} title={pageCopy.title} description={pageCopy.description}>
+  <section class="page-hero surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="page-hero__inner">
+        <h1 class="page-hero__title">{pageCopy.heading}</h1>
+        <p class="page-hero__intro">{pageCopy.intro}</p>
+
+        <div class="portfolio-notice" role="note">
+          <p class="portfolio-notice__title">{pageCopy.noticeTitle}</p>
+          <p class="portfolio-notice__body">{pageCopy.noticeBody}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-light">
+    <div class="container">
+      {projectsData.length === 0 ? (
+        <div class="empty-state">
+          <h2>{copy.common.emptyListTitle}</h2>
+          <p>{copy.common.emptyListBody}</p>
+        </div>
+      ) : (
+        <div class="projects-grid">
+          {projectsData.map((project, idx) => {
+            const loc = project.content[lang];
+            const prefillQuoteHref = `${quoteHref}?need=${encodeURIComponent(project.quoteParam)}`;
+            const delay = Math.min(idx, 3);
+
+            return (
+              <article
+                class="project-card reveal-item"
+                data-delay={delay > 0 ? String(delay) : undefined}
+              >
+                <div class="project-card__media">
+                  <MediaFrame
+                    slotId={project.imageSlot}
+                    lang={lang}
+                    ratio="4/3"
+                    sizes="(max-width: 960px) 100vw, 48vw"
+                    eager={idx < 2}
+                    hoverZoom
+                    rounded="none"
+                  />
+                </div>
+
+                <div class="project-card__body">
+                  <div class="project-card__badges">
+                    <span class="project-card__illustrative">
+                      {copy.common.illustrativeBadge}
+                    </span>
+                    <span class="project-card__category">{loc.category}</span>
+                  </div>
+
+                  <h2 class="project-card__title">{loc.title}</h2>
+                  <p class="project-card__summary">{loc.summary}</p>
+
+                  <dl class="project-specs">
+                    <div class="project-specs__row">
+                      <dt>{labels.materialLabel}</dt>
+                      <dd>{loc.material}</dd>
+                    </div>
+                    <div class="project-specs__row">
+                      <dt>{labels.processLabel}</dt>
+                      <dd>{loc.process}</dd>
+                    </div>
+                    <div class="project-specs__row">
+                      <dt>{labels.sectorLabel}</dt>
+                      <dd>{loc.sector}</dd>
+                    </div>
+                  </dl>
+
+                  <div class="project-focus">
+                    <h3 class="project-focus__heading">{labels.focusLabel}</h3>
+                    <ul class="project-focus__list">
+                      {loc.focusNotes.map((note) => (
+                        <li>{note}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div class="project-card__action">
+                    <Button href={prefillQuoteHref} variant="secondary" surface="light">
+                      {labels.similarCta}
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section surface-dark-alt" data-theme="dark">
+    <div class="container">
+      <CaliperDivider surface="dark" class="projects-cta__divider" />
+
+      <div class="projects-cta">
+        <div class="projects-cta__copy">
+          <SectionHeading
+            heading={labels.ctaHeading}
+            intro={labels.ctaBody}
+            surface="dark"
+            class="projects-cta__heading"
+          />
+        </div>
+
+        <div class="projects-cta__actions">
+          <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+            {copy.common.requestQuote}
+          </Button>
+          <Button href={capabilitiesHref} variant="outline" surface="dark">
+            {copy.common.viewCapabilities}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: calc(var(--header-height) + clamp(3rem, 7vw, 5.25rem));
+    padding-bottom: clamp(3rem, 6vw, 4.75rem);
+  }
+
+  .page-hero__inner {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 58rem;
+  }
+
+  .page-hero__title {
+    color: var(--color-text-light);
+    max-width: 22ch;
+  }
+
+  .page-hero__intro {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 60ch;
+  }
+
+  .portfolio-notice {
+    margin-top: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+    background-color: var(--color-surface-dark);
+    border: 1px solid var(--color-border-dark);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: 0.35rem;
+    max-width: 54rem;
+  }
+
+  .portfolio-notice__title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-text-light);
+  }
+
+  .portfolio-notice__body {
+    font-size: var(--text-sm);
+    color: var(--color-text-light-muted);
+    max-width: 64ch;
+  }
+
+  .empty-state {
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-light-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-light);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 960px) {
+    .projects-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+
+  .project-card {
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .project-card__body {
+    padding: clamp(1.35rem, 2.8vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    flex: 1 1 auto;
+  }
+
+  .project-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .project-card__illustrative {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-xs);
+    background-color: var(--color-surface-tint);
+    border: 1px solid var(--color-border-light-strong);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text-dark);
+  }
+
+  .project-card__category {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-accent-on-light);
+  }
+
+  .project-card__title {
+    font-size: var(--text-xl);
+    color: var(--color-text-dark);
+  }
+
+  .project-card__summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .project-specs {
+    margin: 0;
+    display: grid;
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .project-specs__row {
+    display: grid;
+    gap: 0.2rem;
+    padding-block: 0.65rem;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  @media (min-width: 560px) {
+    .project-specs__row {
+      grid-template-columns: 10.5rem 1fr;
+      gap: 0.75rem;
+      align-items: baseline;
+    }
+  }
+
+  .project-specs__row dt {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text-dark-muted);
+  }
+
+  .project-specs__row dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-dark);
+  }
+
+  .project-focus {
+    display: grid;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+  }
+
+  .project-focus__heading {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark);
+  }
+
+  .project-focus__list {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: grid;
+    gap: 0.4rem;
+    font-size: var(--text-xs);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .project-card__action {
+    padding-top: var(--space-2);
+  }
+
+  .projects-cta__divider {
+    margin-bottom: var(--space-7);
+  }
+
+  .projects-cta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    align-items: end;
+  }
+
+  @media (min-width: 960px) {
+    .projects-cta {
+      grid-template-columns: minmax(0, 1.2fr) auto;
+      gap: var(--space-7);
+    }
+  }
+
+  .projects-cta__heading {
+    margin-bottom: 0;
+  }
+
+  .projects-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+</style>

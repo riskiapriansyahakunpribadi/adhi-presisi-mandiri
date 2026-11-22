@@ -1,0 +1,28 @@
+---
+/*
+PANDUAN EDIT
+File: src/pages/kapabilitas/[slug].astro
+Fungsi: Membangun 4 halaman statis detail Kapabilitas bahasa Indonesia (/kapabilitas/<slug>/) secara otomatis dari src/data/capabilities.ts.
+Boleh diedit: Tidak perlu diubah untuk menyunting isi kapabilitas.
+Jangan diubah: Fungsi getStaticPaths agar Astro menghasilkan seluruh halaman detail kapabilitas secara statis.
+Cara mengedit: Ubah atau tambah kapabilitas melalui src/data/capabilities.ts (dan daftarkan slug baru di src/i18n/routes.ts).
+*/
+
+import CapabilityDetailPage from '../../templates/CapabilityDetailPage.astro';
+import { capabilitiesData, type CapabilityItem } from '../../data/capabilities';
+
+export function getStaticPaths() {
+  return capabilitiesData.map((capability) => ({
+    params: { slug: capability.slug.id },
+    props: { capability },
+  }));
+}
+
+interface Props {
+  capability: CapabilityItem;
+}
+
+const { capability } = Astro.props;
+---
+
+<CapabilityDetailPage lang="id" capability={capability} />

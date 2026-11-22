@@ -1,0 +1,89 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/CaliperDivider.astro
+Fungsi: Motif identitas grafis garis ukur jangka sorong sebagai pembatas antarbagian situs.
+Boleh diedit: Jarak vertikal (padding) pada kelas .caliper-divider.
+Jangan diubah: Atribut aria-hidden="true" karena elemen ini murni grafis dan tidak perlu dibaca pembaca layar.
+Cara mengedit: Ubah warna garis melalui variabel --color-border-dark atau --color-border-light di src/styles/tokens.css.
+*/
+
+export interface Props {
+  surface?: 'dark' | 'light';
+  compact?: boolean;
+  class?: string;
+}
+
+const { surface = 'light', compact = false, class: className = '' } = Astro.props;
+---
+
+<div
+  class:list={[
+    'caliper-divider',
+    `caliper-divider--${surface}`,
+    compact ? 'caliper-divider--compact' : '',
+    className,
+  ]}
+  aria-hidden="true"
+>
+  <span class="caliper-divider__rule"></span>
+  <svg
+    class="caliper-divider__scale"
+    width="120"
+    height="14"
+    viewBox="0 0 120 14"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    focusable="false"
+  >
+    <path
+      d="M1 0V14M13 6V14M25 6V14M37 6V14M49 3V14M61 6V14M73 6V14M85 6V14M97 3V14M109 6V14M119 0V14"
+      stroke="currentColor"
+      stroke-width="1.25"
+    />
+    <rect x="48" y="0" width="2" height="2" class="caliper-divider__accent" />
+  </svg>
+  <span class="caliper-divider__rule"></span>
+</div>
+
+<style>
+  .caliper-divider {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    width: 100%;
+    padding-block: 0.5rem;
+  }
+
+  .caliper-divider--compact {
+    padding-block: 0;
+  }
+
+  .caliper-divider--light {
+    color: var(--color-border-light-strong);
+  }
+
+  .caliper-divider--dark {
+    color: var(--color-border-dark-strong);
+  }
+
+  .caliper-divider__rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.55;
+  }
+
+  .caliper-divider__scale {
+    flex: 0 0 auto;
+    display: block;
+  }
+
+  .caliper-divider--light .caliper-divider__accent {
+    fill: var(--color-accent-on-light);
+  }
+
+  .caliper-divider--dark .caliper-divider__accent {
+    fill: var(--color-accent);
+  }
+</style>

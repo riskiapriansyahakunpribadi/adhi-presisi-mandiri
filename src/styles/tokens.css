@@ -1,0 +1,112 @@
+/*
+PANDUAN EDIT
+File: src/styles/tokens.css
+Fungsi: Pusat seluruh token visual (warna, huruf, ukuran teks, jarak, radius sudut, bayangan, dan durasi animasi).
+Boleh diedit: Nilai warna utama, aksen, skala huruf, jarak antarbagian, dan durasi animasi.
+Jangan diubah: Nama variabel CSS (seperti --color-bg-dark) karena dipakai seluruh komponen situs.
+Cara mengedit: Ubah nilai di sebelah kanan titik dua, lalu periksa kontras teks agar tetap minimal 4,5:1.
+*/
+
+:root {
+  /* EDIT: Palet warna inti. Semua pasangan teks dan latar sudah dihitung memenuhi WCAG AA (minimal 4,5:1). */
+  --color-bg-dark: #12161B;
+  --color-surface-dark: #1C222A;
+  --color-surface-dark-elevated: #242C36;
+  --color-bg-light: #F4F2EE;
+  --color-surface-light: #FAF9F7;
+  --color-surface-tint: #EAE6DF;
+
+  /* EDIT: Warna teks. #4B5460 pada #F4F2EE mencapai kontras 6,85:1; #B4BDC8 pada #1C222A mencapai 8,43:1. */
+  --color-text-light: #F4F2EE;
+  --color-text-light-muted: #B4BDC8;
+  --color-text-dark: #12161B;
+  --color-text-dark-muted: #4B5460;
+  --color-steel: #5B6572;
+
+  /* EDIT: Aksen tunggal oranye industri.
+     Pada latar gelap atau tombol dengan teks grafit gelap (#12161B), #F26A1B mencapai kontras 5,93:1 dan hover #DC5B10 mencapai 4,79:1.
+     Pada latar terang (#F4F2EE), gunakan --color-accent-on-light (#B8470A) agar kontras teks mencapai 4,76:1. */
+  --color-accent: #F26A1B;
+  --color-accent-hover: #DC5B10;
+  --color-accent-on-light: #B8470A;
+  --color-accent-on-light-hover: #963806;
+  --color-accent-ink: #12161B;
+
+  /* Warna garis batas dan status umpan balik form (kontras >= 3:1 untuk batas UI dan >= 4,5:1 untuk teks). */
+  --color-border-dark: #343E4A;
+  --color-border-dark-strong: #687382;
+  --color-border-light: #D5D0C7;
+  --color-border-light-strong: #717A86;
+  --color-scrim-strong: rgba(18, 22, 27, 0.82);
+  --color-scrim-soft: rgba(18, 22, 27, 0.48);
+
+  --color-success-bg: #E6F2EC;
+  --color-success-border: #2D6A4F;
+  --color-success-text: #1B4332;
+  --color-error-bg: #FBEAE8;
+  --color-error-border: #A6261C;
+  --color-error-text: #7A1811;
+
+  /* EDIT: Pasangan huruf self-host Archivo (judul) dan Public Sans (isi). */
+  --font-display: 'Archivo', system-ui, -apple-system, sans-serif;
+  --font-body: 'Public Sans', system-ui, -apple-system, sans-serif;
+
+  /* EDIT: Skala tipografi responsif dengan clamp() agar tetap terbaca dari 360px sampai 1536px dan saat zoom 200%. */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1rem;
+  --text-lg: clamp(1.0625rem, 0.98rem + 0.35vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.12rem + 0.55vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.28rem + 1vw, 2.125rem);
+  --text-3xl: clamp(1.875rem, 1.45rem + 1.8vw, 3rem);
+  --text-hero: clamp(2.125rem, 1.45rem + 2.9vw, 4.125rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.22;
+  --leading-normal: 1.58;
+  --leading-relaxed: 1.72;
+
+  /* EDIT: Skala jarak dan lebar kontainer utama. */
+  --container-max: 82rem;
+  --container-narrow: 52rem;
+  --gutter: clamp(1rem, 3.2vw, 2.5rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: clamp(4rem, 7vw, 7rem);
+
+  /* JANGAN UBAH: Radius bertingkat sesuai hierarki visual. Bentuk pil hanya untuk header melayang dan chip pilihan form. */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Bayangan dibatasi khusus untuk header melayang dan panel menu agar tampilan tetap industrial dan bersih. */
+  --shadow-header: 0 12px 32px rgba(10, 13, 17, 0.36);
+  --shadow-card-float: 0 18px 40px rgba(10, 13, 17, 0.28);
+
+  /* EDIT: Kecepatan dan kurva animasi. Gerakan non-esensial dimatikan otomatis saat prefers-reduced-motion aktif. */
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 520ms;
+  --dur-hero-zoom: 1600ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-press: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* JANGAN UBAH: Tinggi dasar area sentuh minimum 44x44 piksel sesuai standar aksesibilitas. */
+  --tap-min: 44px;
+  --header-height: 76px;
+
+  /* JANGAN UBAH: Urutan lapisan agar header, menu HP, dan skip-link tidak saling tertutup. */
+  --z-base: 1;
+  --z-header: 40;
+  --z-drawer: 60;
+  --z-skip: 100;
+}

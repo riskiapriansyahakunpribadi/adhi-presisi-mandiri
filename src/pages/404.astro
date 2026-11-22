@@ -1,0 +1,136 @@
+---
+/*
+PANDUAN EDIT
+File: src/pages/404.astro
+Fungsi: Halaman 404 otomatis untuk URL yang tidak ditemukan pada situs statis, menyediakan navigasi kembali untuk pengunjung Indonesia dan Inggris.
+Boleh diedit: Jarak atau susunan tautan cepat di blok style.
+Jangan diubah: Prop noindex pada BaseLayout agar mesin pencari tidak mengindeks halaman 404.
+Cara mengedit: Ubah teks judul dan pesan 404 melalui pages.notFound pada src/i18n/id.ts dan src/i18n/en.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+
+import { getCopy, getRoute } from '../i18n/utils';
+
+const idCopy = getCopy('id');
+const enCopy = getCopy('en');
+
+const homeId = getRoute('home', 'id');
+const quoteId = getRoute('quote', 'id');
+const homeEn = getRoute('home', 'en');
+const quoteEn = getRoute('quote', 'en');
+---
+
+<BaseLayout
+  lang="id"
+  title={idCopy.pages.notFound.title}
+  description={idCopy.pages.notFound.description}
+  noindex
+>
+  <section class="notfound surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="notfound__inner">
+        <p class="notfound__code" aria-hidden="true">
+          {idCopy.pages.notFound.code}
+        </p>
+
+        <h1 class="notfound__title">{idCopy.pages.notFound.heading}</h1>
+        <p class="notfound__body">{idCopy.pages.notFound.body}</p>
+
+        <div class="notfound__actions">
+          <Button href={homeId} variant="primary" surface="dark" withArrow>
+            {idCopy.pages.notFound.homeCta}
+          </Button>
+          <Button href={quoteId} variant="outline" surface="dark">
+            {idCopy.pages.notFound.quoteCta}
+          </Button>
+        </div>
+
+        <CaliperDivider surface="dark" class="notfound__divider" />
+
+        <div class="notfound__en" lang="en">
+          <h2 class="notfound__en-title">{enCopy.pages.notFound.heading}</h2>
+          <p class="notfound__en-body">{enCopy.pages.notFound.body}</p>
+          <div class="notfound__en-links">
+            <Button href={homeEn} variant="secondary" surface="dark">
+              {enCopy.pages.notFound.homeCta}
+            </Button>
+            <Button href={quoteEn} variant="secondary" surface="dark">
+              {enCopy.pages.notFound.quoteCta}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    min-height: min(78dvh, 760px);
+    display: flex;
+    align-items: center;
+    padding-top: calc(var(--header-height) + clamp(3rem, 7vw, 5.5rem));
+    padding-bottom: clamp(3.5rem, 7vw, 5.5rem);
+  }
+
+  .notfound__inner {
+    max-width: 46rem;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .notfound__code {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 2.2rem + 3vw, 5rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .notfound__title {
+    color: var(--color-text-light);
+  }
+
+  .notfound__body {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 54ch;
+  }
+
+  .notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-top: var(--space-2);
+  }
+
+  .notfound__divider {
+    margin-block: var(--space-5) var(--space-3);
+  }
+
+  .notfound__en {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .notfound__en-title {
+    font-size: var(--text-xl);
+    color: var(--color-text-light);
+  }
+
+  .notfound__en-body {
+    font-size: var(--text-sm);
+    color: var(--color-text-light-muted);
+    max-width: 54ch;
+  }
+
+  .notfound__en-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.75rem;
+  }
+</style>

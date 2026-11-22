@@ -1,0 +1,251 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/Button.astro
+Fungsi: Komponen tombol dan tautan aksi (utama, sekunder, garis) dengan lapisan geser hover, efek tekan sentuh, dan fokus keyboard.
+Boleh diedit: Jarak dalam tombol (padding) atau ketebalan teks pada blok style.
+Jangan diubah: Pemilihan elemen <a> untuk navigasi dan <button> untuk aksi, rel="noopener noreferrer", serta aturan @media (hover: hover).
+Cara mengedit: Ubah warna melalui src/styles/tokens.css agar kontras tetap memenuhi WCAG AA.
+*/
+
+import Icon from './Icon.astro';
+
+export interface Props {
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  variant?: 'primary' | 'secondary' | 'outline';
+  surface?: 'dark' | 'light';
+  withArrow?: boolean;
+  external?: boolean;
+  fullWidth?: boolean;
+  disabled?: boolean;
+  ariaLabel?: string;
+  class?: string;
+}
+
+const {
+  href,
+  type = 'button',
+  variant = 'primary',
+  surface = 'light',
+  withArrow = false,
+  external = false,
+  fullWidth = false,
+  disabled = false,
+  ariaLabel,
+  class: className = '',
+} = Astro.props;
+
+const classes = [
+  'btn',
+  `btn--${variant}`,
+  `btn--on-${surface}`,
+  fullWidth ? 'btn--full' : '',
+  className,
+];
+---
+
+{href ? (
+  <a
+    href={href}
+    class:list={classes}
+    target={external ? '_blank' : undefined}
+    rel={external ? 'noopener noreferrer' : undefined}
+    aria-label={ariaLabel}
+  >
+    <span class="btn__content">
+      <span class="btn__label"><slot /></span>
+      {withArrow && <Icon name="arrow-right" size={18} class="btn__arrow" />}
+    </span>
+  </a>
+) : (
+  <button
+    type={type}
+    class:list={classes}
+    disabled={disabled}
+    aria-label={ariaLabel}
+  >
+    <span class="btn__content">
+      <span class="btn__label"><slot /></span>
+      {withArrow && <Icon name="arrow-right" size={18} class="btn__arrow" />}
+    </span>
+  </button>
+)}
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--tap-min);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    line-height: 1.2;
+    text-decoration: none;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      transform var(--dur-fast) var(--ease-press),
+      color var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard),
+      background-color var(--dur-base) var(--ease-standard);
+  }
+
+  .btn--full {
+    width: 100%;
+  }
+
+  .btn__content {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+  }
+
+  .btn__arrow {
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  /* Tombol utama: latar aksen oranye dengan lapisan lebih gelap meluncur dari kiri saat hover. */
+  .btn--primary {
+    padding: 0.8rem 1.4rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-accent);
+    color: var(--color-accent-ink);
+    border: 1px solid transparent;
+  }
+
+  .btn--primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: var(--color-accent-hover);
+    transform: translateX(-101%);
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  /* Tombol sekunder: tautan bertepi bersih dengan garis bawah tergambar dari kiri ke kanan. */
+  .btn--secondary {
+    padding: 0.65rem 0.15rem;
+    border-radius: var(--radius-xs);
+    background-color: transparent;
+  }
+
+  .btn--secondary.btn--on-dark {
+    color: var(--color-text-light);
+  }
+
+  .btn--secondary.btn--on-light {
+    color: var(--color-text-dark);
+  }
+
+  .btn--secondary::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.35rem;
+    height: 2px;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  .btn--secondary.btn--on-dark::after {
+    background-color: var(--color-accent);
+  }
+
+  .btn--secondary.btn--on-light::after {
+    background-color: var(--color-accent-on-light);
+  }
+
+  /* Tombol outline untuk aksi alternatif yang membutuhkan batas jelas. */
+  .btn--outline {
+    padding: 0.78rem 1.35rem;
+    border-radius: var(--radius-sm);
+    background-color: transparent;
+  }
+
+  .btn--outline.btn--on-dark {
+    color: var(--color-text-light);
+    border: 1.5px solid var(--color-border-dark-strong);
+  }
+
+  .btn--outline.btn--on-light {
+    color: var(--color-text-dark);
+    border: 1.5px solid var(--color-text-dark);
+  }
+
+  /* Efek hover hanya diaktifkan pada perangkat yang mendukung pointer hover. */
+  @media (hover: hover) {
+    .btn--primary:hover::before {
+      transform: translateX(0);
+    }
+
+    .btn--primary:hover .btn__arrow,
+    .btn--secondary:hover .btn__arrow,
+    .btn--outline:hover .btn__arrow {
+      transform: translateX(4px);
+    }
+
+    .btn--secondary:hover::after {
+      transform: scaleX(1);
+    }
+
+    .btn--secondary.btn--on-light:hover {
+      color: var(--color-accent-on-light);
+    }
+
+    .btn--outline.btn--on-dark:hover {
+      background-color: var(--color-surface-dark-elevated);
+      border-color: var(--color-text-light);
+    }
+
+    .btn--outline.btn--on-light:hover {
+      background-color: var(--color-text-dark);
+      color: var(--color-text-light);
+    }
+  }
+
+  /* Padanan sentuhan (:active) agar perangkat HP juga mendapat umpan balik tekan yang jelas. */
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .btn--primary:active:not(:disabled)::before {
+    transform: translateX(0);
+  }
+
+  .btn--secondary:active::after {
+    transform: scaleX(1);
+  }
+
+  .btn--outline.btn--on-dark:active {
+    background-color: var(--color-surface-dark-elevated);
+  }
+
+  .btn--outline.btn--on-light:active {
+    background-color: var(--color-text-dark);
+    color: var(--color-text-light);
+  }
+
+  /* JANGAN UBAH: Cincin fokus 3px berdaya kontras tinggi untuk pengguna keyboard. */
+  .btn:focus-visible {
+    outline: 3px solid var(--color-accent-on-light);
+    outline-offset: 3px;
+  }
+
+  .btn--on-dark:focus-visible {
+    outline-color: var(--color-accent);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>

@@ -1,0 +1,22 @@
+# PANDUAN EDIT
+# File: .gitignore
+# Fungsi: Menentukan folder dan file lokal yang tidak boleh ikut diunggah ke GitHub.
+# Boleh diedit: Tambahkan nama file rahasia lokal lain bila suatu saat diperlukan.
+# Jangan diubah: Baris node_modules/, dist/, dan .astro/ agar repositori tetap ringan dan aman.
+# Cara mengedit: Tambahkan satu pola nama file atau folder per baris.
+
+# Dependensi dan hasil build
+node_modules/
+dist/
+.astro/
+.vercel/
+
+# File lingkungan rahasia
+.env
+.env.*
+!.env.example
+
+# File sistem operasi dan editor
+.DS_Store
+Thumbs.db
+*.log

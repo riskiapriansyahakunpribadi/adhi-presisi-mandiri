@@ -1,0 +1,443 @@
+---
+/*
+PANDUAN EDIT
+File: src/templates/ServiceDetailPage.astro
+Fungsi: Template untuk 4 halaman detail Layanan (ID dan EN) menampilkan ruang lingkup, hasil serah terima, data masukan, dan navigasi ke layanan lain.
+Boleh diedit: Proporsi kolom utama dan kolom samping pada blok style.
+Jangan diubah: Urutan heading (h1 untuk nama layanan, h2 untuk subbagian, h3 untuk kartu layanan terkait) serta tautan kembali ke daftar layanan.
+Cara mengedit: Ubah isi masing-masing layanan langsung pada src/data/services.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+import Icon from '../components/Icon.astro';
+import MediaFrame from '../components/MediaFrame.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+import { companyData } from '../data/company';
+import { getServiceHref, servicesData, type ServiceItem } from '../data/services';
+import type { Lang } from '../i18n/routes';
+import { getCopy, getRoute } from '../i18n/utils';
+
+export interface Props {
+  lang: Lang;
+  service: ServiceItem;
+}
+
+const { lang, service } = Astro.props;
+const copy = getCopy(lang);
+const loc = service.content[lang];
+const servicesHref = getRoute('services', lang);
+const quoteHref = getRoute('quote', lang);
+
+const relatedServices = servicesData.filter((item) => item.id !== service.id);
+
+const detailLabels =
+  lang === 'id'
+    ? {
+        backLabel: 'Semua layanan',
+        actionHeading: 'Diskusikan kebutuhan komponen Anda',
+        actionBody:
+          'Kirim gambar teknik atau rincian suku cadang agar tim engineering kami menyiapkan tinjauan awal pada jam kerja.',
+        hoursLabel: 'Jam kerja bengkel',
+        otherServicesHeading: 'Layanan lainnya',
+      }
+    : {
+        backLabel: 'All services',
+        actionHeading: 'Discuss your component requirement',
+        actionBody:
+          'Share your engineering drawing or spare part details so our engineering team can prepare an initial review during business hours.',
+        hoursLabel: 'Workshop hours',
+        otherServicesHeading: 'Other services',
+      };
+---
+
+<BaseLayout lang={lang} title={loc.seoTitle} description={loc.seoDescription}>
+  <section class="detail-hero surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="detail-hero__grid">
+        <div class="detail-hero__copy">
+          <a href={servicesHref} class="back-link">
+            <span>{detailLabels.backLabel}</span>
+          </a>
+
+          <h1 class="detail-hero__title">{loc.title}</h1>
+          <p class="detail-hero__summary">{loc.shortSummary}</p>
+
+          <div class="detail-hero__actions">
+            <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+              {copy.common.requestQuote}
+            </Button>
+          </div>
+        </div>
+
+        <div class="detail-hero__media">
+          <MediaFrame
+            slotId={service.imageSlot}
+            lang={lang}
+            ratio="4/3"
+            sizes="(max-width: 960px) 100vw, 44vw"
+            eager
+            rounded="sm"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-light">
+    <div class="container">
+      <div class="detail-layout">
+        <div class="detail-main">
+          <div class="detail-overview reveal-item">
+            <p class="detail-overview__text">{loc.overview}</p>
+          </div>
+
+          <div class="detail-block reveal-item" data-delay="1">
+            <h2 class="detail-block__heading">{loc.scopeHeading}</h2>
+            <ul class="detail-list">
+              {loc.scopeItems.map((item) => (
+                <li class="detail-list__item">{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="detail-deliverables reveal-item" data-delay="2">
+            <h2 class="detail-block__heading">{loc.deliverablesHeading}</h2>
+            <ul class="detail-deliverables__list">
+              {loc.deliverables.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <aside class="detail-sidebar">
+          <div class="sidebar-card reveal-item">
+            <h2 class="sidebar-card__heading">{loc.inputsHeading}</h2>
+            <ul class="sidebar-card__list">
+              {loc.inputs.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="sidebar-cta surface-dark reveal-item" data-theme="dark" data-delay="1">
+            <h2 class="sidebar-cta__heading">{detailLabels.actionHeading}</h2>
+            <p class="sidebar-cta__body">{detailLabels.actionBody}</p>
+            <div class="sidebar-cta__meta">
+              <Icon name="clock" size={16} />
+              <span>{detailLabels.hoursLabel}: {companyData.workingHours[lang]}</span>
+            </div>
+            <Button href={quoteHref} variant="primary" surface="dark" fullWidth withArrow>
+              {copy.common.requestQuote}
+            </Button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-paper">
+    <div class="container">
+      <CaliperDivider surface="light" class="related__divider" />
+
+      <SectionHeading
+        heading={detailLabels.otherServicesHeading}
+        surface="light"
+      />
+
+      <div class="related-grid">
+        {relatedServices.map((item, idx) => {
+          const itemLoc = item.content[lang];
+          const itemHref = getServiceHref(item, lang);
+          const delay = Math.min(idx, 2);
+          return (
+            <article
+              class="related-card reveal-item"
+              data-delay={delay > 0 ? String(delay) : undefined}
+            >
+              <a href={itemHref} class="related-card__link">
+                <MediaFrame
+                  slotId={item.imageSlot}
+                  lang={lang}
+                  ratio="4/3"
+                  sizes="(max-width: 768px) 100vw, 31vw"
+                  hoverZoom
+                  rounded="none"
+                />
+                <div class="related-card__body">
+                  <h3 class="related-card__title">{itemLoc.title}</h3>
+                  <p class="related-card__summary">{itemLoc.shortSummary}</p>
+                  <span class="related-card__cta">{copy.common.viewServiceDetail}</span>
+                </div>
+              </a>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .detail-hero {
+    padding-top: calc(var(--header-height) + clamp(2.75rem, 6vw, 4.75rem));
+    padding-bottom: clamp(2.75rem, 6vw, 4.5rem);
+  }
+
+  .detail-hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    align-items: center;
+  }
+
+  @media (min-width: 960px) {
+    .detail-hero__grid {
+      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.92fr);
+      gap: var(--space-8);
+    }
+  }
+
+  .detail-hero__copy {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-text-light-muted);
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-dark-strong);
+    text-underline-offset: 0.25em;
+    transition: color var(--dur-fast) var(--ease-standard);
+  }
+
+  @media (hover: hover) {
+    .back-link:hover {
+      color: var(--color-text-light);
+      text-decoration-color: var(--color-accent);
+    }
+  }
+
+  .detail-hero__title {
+    color: var(--color-text-light);
+    max-width: 20ch;
+  }
+
+  .detail-hero__summary {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 54ch;
+  }
+
+  .detail-hero__actions {
+    padding-top: var(--space-2);
+  }
+
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .detail-layout {
+      grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.78fr);
+      gap: var(--space-8);
+    }
+  }
+
+  .detail-main {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .detail-overview__text {
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--color-text-dark);
+    font-weight: 500;
+    max-width: 56ch;
+  }
+
+  .detail-block {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .detail-block__heading {
+    font-size: var(--text-2xl);
+    color: var(--color-text-dark);
+  }
+
+  .detail-list {
+    list-style: none;
+    display: grid;
+    border-top: 1px solid var(--color-border-light-strong);
+  }
+
+  .detail-list__item {
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text-dark);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  .detail-deliverables {
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-left: 3px solid var(--color-accent-on-light);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .detail-deliverables__list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: var(--space-3);
+    color: var(--color-text-dark-muted);
+  }
+
+  .detail-sidebar {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 1024px) {
+    .detail-sidebar {
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+    }
+  }
+
+  .sidebar-card {
+    padding: var(--space-5);
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .sidebar-card__heading {
+    font-size: var(--text-lg);
+    color: var(--color-text-dark);
+  }
+
+  .sidebar-card__list {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.7rem;
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+  }
+
+  .sidebar-cta {
+    padding: var(--space-5);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-dark);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .sidebar-cta__heading {
+    font-size: var(--text-xl);
+    color: var(--color-text-light);
+  }
+
+  .sidebar-cta__body {
+    font-size: var(--text-sm);
+    color: var(--color-text-light-muted);
+  }
+
+  .sidebar-cta__meta {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    color: var(--color-text-light-muted);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-dark);
+  }
+
+  .related__divider {
+    margin-bottom: var(--space-7);
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .related-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1080px) {
+    .related-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .related-card {
+    background-color: var(--color-bg-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: flex;
+  }
+
+  .related-card__link {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .related-card__body {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1 1 auto;
+  }
+
+  .related-card__title {
+    font-size: var(--text-lg);
+    color: var(--color-text-dark);
+  }
+
+  .related-card__summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+    flex: 1 1 auto;
+  }
+
+  .related-card__cta {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-accent-on-light);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+</style>

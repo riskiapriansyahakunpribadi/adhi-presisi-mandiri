@@ -1,0 +1,130 @@
+---
+/*
+PANDUAN EDIT
+File: src/layouts/BaseLayout.astro
+Fungsi: Kerangka HTML utama setiap halaman yang menyatukan font self-host, CSS global, Header, Footer, skrip interaksi, SEO, Open Graph, hreflang, dan data Organization.
+Boleh diedit: Tidak perlu diubah untuk menyunting teks atau gambar (ubah di src/i18n/ atau src/data/).
+Jangan diubah: Tag viewport (tanpa user-scalable=no), atribut lang, tautan hreflang, ClientRouter, dan pemuatan site.ts agar seluruh fitur lintas halaman berjalan.
+Cara mengedit: File ini sudah final untuk seluruh halaman; gunakan prop lang, title, dan description dari tiap halaman.
+*/
+
+import { ClientRouter } from 'astro:transitions';
+
+// JANGAN UBAH: Memuat hanya bobot huruf yang dipakai secara self-host (font-display: swap bawaan @fontsource).
+import '@fontsource/archivo/600.css';
+import '@fontsource/archivo/700.css';
+import '@fontsource/public-sans/400.css';
+import '@fontsource/public-sans/500.css';
+import '@fontsource/public-sans/600.css';
+
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+import { companyData, isPlaceholderValue } from '../data/company';
+import { buildUnsplashSrc, imageSlots } from '../data/images';
+import { getCopy, buildHreflangUrls } from '../i18n/utils';
+import type { Lang } from '../i18n/routes';
+
+export interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+
+const { lang, title, description, noindex = false } = Astro.props;
+const copy = getCopy(lang);
+const siteOrigin = Astro.site?.toString() ?? companyData.domain;
+const hreflang = buildHreflangUrls(siteOrigin, Astro.url.pathname);
+
+const heroMeta = imageSlots['hero-utama'];
+const ogImage = heroMeta.remoteUrl
+  ? buildUnsplashSrc(heroMeta.remoteUrl, 1200)
+  : '';
+
+// JANGAN UBAH: Data terstruktur Organization hanya mengisi fakta jujur tanpa sertifikasi atau kontak palsu.
+const organizationSchema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: companyData.legalName,
+  alternateName: companyData.shortName,
+  url: siteOrigin.replace(/\/+$/, ''),
+  description: copy.siteTagline,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: `${companyData.address.street}, ${companyData.address.area}`,
+    addressLocality: companyData.address.city,
+    addressRegion: companyData.address.province,
+    postalCode: companyData.address.postalCode,
+    addressCountry: 'ID',
+  },
+};
+
+if (!isPlaceholderValue(companyData.contact.phoneHref)) {
+  organizationSchema.telephone = companyData.contact.phoneDisplay;
+}
+
+if (!isPlaceholderValue(companyData.contact.email)) {
+  organizationSchema.email = companyData.contact.email;
+}
+
+if (!isPlaceholderValue(companyData.social.linkedin)) {
+  organizationSchema.sameAs = [companyData.social.linkedin];
+}
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <link rel="canonical" href={hreflang.canonical} />
+    <link rel="alternate" hreflang="id" href={hreflang.idUrl} />
+    <link rel="alternate" hreflang="en" href={hreflang.enUrl} />
+    <link rel="alternate" hreflang="x-default" href={hreflang.xDefaultUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={companyData.legalName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={hreflang.canonical} />
+    <meta property="og:locale" content={lang === 'id' ? 'id_ID' : 'en_US'} />
+    <meta property="og:locale:alternate" content={lang === 'id' ? 'en_US' : 'id_ID'} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(organizationSchema)}
+    />
+
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip-link" href="#konten-utama">{copy.skipToContent}</a>
+    <Header lang={lang} />
+    <main id="konten-utama" tabindex="-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+
+    <script>
+      import '../scripts/site';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,448 @@
+---
+/*
+PANDUAN EDIT
+File: src/templates/IndustriesPage.astro
+Fungsi: Template halaman Industri versi bahasa Indonesia dan Inggris menampilkan 4 sektor pabrik utama di kawasan Cikarang dan Jawa Barat beserta contoh komponennya.
+Boleh diedit: Jarak antarbagian atau komposisi grid kartu pada blok style.
+Jangan diubah: Atribut id dan scroll-margin-top pada setiap sektor agar tautan lompat cepat di hero berhenti tepat di bawah header melayang.
+Cara mengedit: Ubah daftar sektor dan contoh komponennya melalui pages.industries di src/i18n/id.ts dan src/i18n/en.ts.
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import CaliperDivider from '../components/CaliperDivider.astro';
+import MediaFrame from '../components/MediaFrame.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+import { capabilitiesData, getCapabilityHref } from '../data/capabilities';
+import type { Lang } from '../i18n/routes';
+import { getCopy, getRoute } from '../i18n/utils';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const copy = getCopy(lang);
+const pageCopy = copy.pages.industries;
+
+const quoteHref = getRoute('quote', lang);
+const projectsHref = getRoute('projects', lang);
+
+// EDIT: Label navigasi internal dan teks penghubung halaman Industri.
+const labels =
+  lang === 'id'
+    ? {
+        jumpAria: 'Lompat ke sektor industri',
+        examplesHeading: 'Komponen dan perkakas yang biasa dikerjakan',
+        sectorQuoteCta: 'Kirim gambar teknik untuk sektor ini',
+        projectsCta: 'Lihat contoh jenis pekerjaan',
+        relatedHeading: 'Kapabilitas yang mendukung lini produksi Anda',
+        relatedIntro:
+          'Setiap sektor di atas dilayani langsung dari bengkel Cikarang melalui empat kapabilitas utama berikut.',
+      }
+    : {
+        jumpAria: 'Jump to industrial sector',
+        examplesHeading: 'Components and tooling commonly machined',
+        sectorQuoteCta: 'Send drawing for this sector',
+        projectsCta: 'View work examples',
+        relatedHeading: 'Capabilities supporting your factory lines',
+        relatedIntro:
+          'Every sector above is supported directly from our Cikarang shop through these four core capabilities.',
+      };
+---
+
+<BaseLayout lang={lang} title={pageCopy.title} description={pageCopy.description}>
+  <section class="page-hero surface-dark" data-theme="dark">
+    <div class="container">
+      <div class="page-hero__inner">
+        <h1 class="page-hero__title">{pageCopy.heading}</h1>
+        <p class="page-hero__intro">{pageCopy.intro}</p>
+
+        {pageCopy.sectors.length > 0 && (
+          <nav class="sector-nav" aria-label={labels.jumpAria}>
+            {pageCopy.sectors.map((sector) => (
+              <a href={`#${sector.id}`} class="sector-nav__chip">
+                {sector.name}
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-light">
+    <div class="container">
+      {pageCopy.sectors.length === 0 ? (
+        <div class="empty-state">
+          <h2>{copy.common.emptyListTitle}</h2>
+          <p>{copy.common.emptyListBody}</p>
+        </div>
+      ) : (
+        <div class="sectors-stack">
+          {pageCopy.sectors.map((sector, idx) => {
+            const reversed = idx % 2 === 1;
+            const delay = Math.min(idx, 3);
+            return (
+              <article
+                id={sector.id}
+                class:list={[
+                  'sector-block',
+                  reversed ? 'sector-block--reversed' : '',
+                  'reveal-item',
+                ]}
+                data-delay={delay > 0 ? String(delay) : undefined}
+              >
+                <div class="sector-block__media">
+                  <MediaFrame
+                    slotId={sector.imageSlot}
+                    lang={lang}
+                    ratio="3/2"
+                    sizes="(max-width: 960px) 100vw, 48vw"
+                    eager={idx === 0}
+                    hoverZoom
+                    rounded="sm"
+                  />
+                </div>
+
+                <div class="sector-block__body">
+                  <h2 class="sector-block__title">{sector.name}</h2>
+                  <p class="sector-block__summary">{sector.summary}</p>
+
+                  <div class="sector-block__examples">
+                    <h3 class="sector-block__examples-title">
+                      {labels.examplesHeading}
+                    </h3>
+                    <ul class="sector-block__list">
+                      {sector.examples.map((item) => (
+                        <li>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div class="sector-block__action">
+                    <Button href={quoteHref} variant="secondary" surface="light">
+                      {labels.sectorQuoteCta}
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section surface-paper">
+    <div class="container">
+      <CaliperDivider surface="light" class="ind-divider" />
+
+      <SectionHeading
+        heading={labels.relatedHeading}
+        intro={labels.relatedIntro}
+        surface="light"
+        align="split"
+      />
+
+      <div class="cap-strip">
+        {capabilitiesData.map((cap, idx) => {
+          const loc = cap.content[lang];
+          const href = getCapabilityHref(cap, lang);
+          const delay = Math.min(idx, 3);
+          return (
+            <article
+              class="cap-mini reveal-item"
+              data-delay={delay > 0 ? String(delay) : undefined}
+            >
+              <a href={href} class="cap-mini__link">
+                <span class="cap-mini__tag">{loc.shortTag}</span>
+                <h3 class="cap-mini__title">{loc.title}</h3>
+                <p class="cap-mini__summary">{loc.shortSummary}</p>
+                <span class="cap-mini__cta">{copy.common.viewCapabilityDetail}</span>
+              </a>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-dark-alt" data-theme="dark">
+    <div class="container">
+      <div class="ind-cta">
+        <div class="ind-cta__copy">
+          <h2 class="ind-cta__title">{pageCopy.ctaHeading}</h2>
+          <p class="ind-cta__body">{pageCopy.ctaBody}</p>
+        </div>
+        <div class="ind-cta__actions">
+          <Button href={quoteHref} variant="primary" surface="dark" withArrow>
+            {pageCopy.ctaButton}
+          </Button>
+          <Button href={projectsHref} variant="outline" surface="dark">
+            {labels.projectsCta}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: calc(var(--header-height) + clamp(3rem, 7vw, 5.25rem));
+    padding-bottom: clamp(3rem, 6vw, 4.75rem);
+  }
+
+  .page-hero__inner {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 60rem;
+  }
+
+  .page-hero__title {
+    color: var(--color-text-light);
+    max-width: 24ch;
+  }
+
+  .page-hero__intro {
+    font-size: var(--text-lg);
+    color: var(--color-text-light-muted);
+    max-width: 60ch;
+  }
+
+  .sector-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding-top: var(--space-2);
+  }
+
+  .sector-nav__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface-dark-elevated);
+    border: 1px solid var(--color-border-dark-strong);
+    color: var(--color-text-light);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-standard),
+      background-color var(--dur-fast) var(--ease-standard),
+      transform var(--dur-fast) var(--ease-press);
+  }
+
+  .sector-nav__chip:active {
+    transform: scale(0.98);
+  }
+
+  @media (hover: hover) {
+    .sector-nav__chip:hover {
+      border-color: var(--color-accent);
+      background-color: var(--color-surface-dark);
+    }
+  }
+
+  .empty-state {
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-light-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-light);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .sectors-stack {
+    display: grid;
+    gap: clamp(3rem, 6vw, 5.25rem);
+  }
+
+  /* scroll-margin-top memastikan judul sektor tidak tertutup header melayang saat chip diklik. */
+  .sector-block {
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: center;
+    padding-bottom: clamp(2.5rem, 5vw, 4.25rem);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .sector-block:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  @media (min-width: 960px) {
+    .sector-block {
+      grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+      gap: var(--space-8);
+    }
+
+    .sector-block--reversed .sector-block__media {
+      order: 2;
+    }
+
+    .sector-block--reversed .sector-block__body {
+      order: 1;
+    }
+  }
+
+  .sector-block__body {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+
+  .sector-block__title {
+    font-size: var(--text-2xl);
+    color: var(--color-text-dark);
+  }
+
+  .sector-block__summary {
+    font-size: var(--text-base);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .sector-block__examples {
+    padding: var(--space-5);
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-left: 3px solid var(--color-accent-on-light);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .sector-block__examples-title {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark);
+  }
+
+  .sector-block__list {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.55rem;
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+  }
+
+  .sector-block__action {
+    padding-top: var(--space-1);
+  }
+
+  .ind-divider {
+    margin-bottom: var(--space-7);
+  }
+
+  .cap-strip {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .cap-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1120px) {
+    .cap-strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .cap-mini {
+    background-color: var(--color-bg-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    display: flex;
+    transition: border-color var(--dur-base) var(--ease-standard);
+  }
+
+  .cap-mini__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .cap-mini__tag {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-accent-on-light);
+  }
+
+  .cap-mini__title {
+    font-size: var(--text-lg);
+    color: var(--color-text-dark);
+  }
+
+  .cap-mini__summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+    flex: 1 1 auto;
+  }
+
+  .cap-mini__cta {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-accent-on-light);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  @media (hover: hover) {
+    .cap-mini:hover {
+      border-color: var(--color-border-light-strong);
+    }
+  }
+
+  .ind-cta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .ind-cta {
+      grid-template-columns: minmax(0, 1.25fr) auto;
+      gap: var(--space-6);
+    }
+  }
+
+  .ind-cta__copy {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .ind-cta__title {
+    color: var(--color-text-light);
+    max-width: 24ch;
+  }
+
+  .ind-cta__body {
+    color: var(--color-text-light-muted);
+    max-width: 56ch;
+  }
+
+  .ind-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+</style>

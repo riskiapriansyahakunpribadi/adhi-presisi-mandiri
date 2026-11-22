@@ -1,0 +1,20 @@
+# PANDUAN EDIT
+# File: public/_headers
+# Fungsi: Menetapkan header keamanan HTTP saat situs dihosting di Cloudflare Pages atau Netlify.
+# Boleh diedit: Bagian connect-src pada Content-Security-Policy sesuai domain layanan form pihak ketiga yang Anda pilih.
+# Jangan diubah: script-src 'self', X-Content-Type-Options, Referrer-Policy, Permissions-Policy, dan frame-ancestors agar perlindungan peramban tetap aktif.
+# Cara mengedit: Tambahkan domain layanan form setelah 'self' pada connect-src, misalnya: connect-src 'self' https://formspree.io;
+
+/*
+  # EDIT: Tambahkan domain layanan form pada connect-src bila memakai layanan pihak ketiga (contoh: https://formspree.io atau https://api.web3forms.com).
+  # Catatan teknis: style-src mengizinkan 'unsafe-inline' khusus agar gaya transisi ClientRouter Astro berjalan normal; script-src tetap dikunci ketat pada 'self'.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; media-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+  # JANGAN UBAH: Header perlindungan standar untuk mencegah clickjacking, MIME sniffing, dan kebocoran perujuk.
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+
+/_astro/*
+  # Aset hasil build Astro memiliki hash unik pada nama file sehingga aman disimpan lama di cache peramban.
+  Cache-Control: public, max-age=31536000, immutable

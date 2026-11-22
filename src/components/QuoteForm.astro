@@ -1,0 +1,757 @@
+---
+/*
+PANDUAN EDIT
+File: src/components/QuoteForm.astro
+Fungsi: Komponen formulir permintaan penawaran lengkap dengan pilihan chip jenis kebutuhan, validasi, honeypot, status pengiriman, dan panel jalur WhatsApp cadangan.
+Boleh diedit: Susunan jarak kolom input pada blok style.
+Jangan diubah: Atribut data-* pada elemen form, kolom honeypot "website", label terlihat setiap input, dan peran aria-live agar validasi serta aksesibilitas tetap utuh.
+Cara mengedit: Ubah seluruh teks label dan pesan status di src/i18n/id.ts dan src/i18n/en.ts; pasang endpoint form dan nomor WhatsApp di src/data/company.ts.
+*/
+
+import {
+  companyData,
+  getWhatsappUrl,
+  isPlaceholderValue,
+} from '../data/company';
+import type { Lang } from '../i18n/routes';
+import { getCopy } from '../i18n/utils';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const copy = getCopy(lang);
+const qf = copy.quoteForm;
+
+const activeEndpoint = isPlaceholderValue(companyData.form.endpoint)
+  ? ''
+  : companyData.form.endpoint.trim();
+
+const whatsappHref = getWhatsappUrl(lang);
+const hasPhone = !isPlaceholderValue(companyData.contact.phoneHref);
+const hasEmail = !isPlaceholderValue(companyData.contact.email);
+const addressFull =
+  lang === 'id' ? companyData.address.fullId : companyData.address.fullEn;
+const optionalTag = lang === 'id' ? '(opsional)' : '(optional)';
+---
+
+<div class="quote-grid">
+  <form
+    class="quote-form"
+    novalidate
+    aria-label={qf.formAriaLabel}
+    data-quote-form
+    data-lang={lang}
+    data-endpoint={activeEndpoint}
+    data-submit-text={qf.submitButton}
+    data-submitting-text={qf.submittingButton}
+    data-submitting-status={qf.status.submitting}
+    data-success-title={qf.status.successTitle}
+    data-success-body={qf.status.successBody}
+    data-no-endpoint-title={qf.status.errorNoEndpointTitle}
+    data-no-endpoint-body={qf.status.errorNoEndpointBody}
+    data-network-error-title={qf.status.errorNetworkTitle}
+    data-network-error-body={qf.status.errorNetworkBody}
+    data-validation-summary={qf.status.validationSummary}
+  >
+    <!-- JANGAN UBAH: Kolom jebakan bot (honeypot) tersembunyi dari pengunjung manusia. -->
+    <div class="hp-field" aria-hidden="true">
+      <label for="quote-website">{qf.fields.honeypotLabel}</label>
+      <input
+        id="quote-website"
+        name="website"
+        type="text"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+
+    <div
+      class="form-status"
+      data-form-status
+      role="status"
+      aria-live="polite"
+      tabindex="-1"
+      hidden
+    >
+      <p class="form-status__title" data-form-status-title></p>
+      <p class="form-status__body" data-form-status-body></p>
+    </div>
+
+    <div class="form-row form-row--two">
+      <div class="form-field">
+        <label class="form-label" for="quote-fullName">
+          {qf.fields.fullName.label}
+          <span class="form-req" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="quote-fullName"
+          name="fullName"
+          type="text"
+          class="form-input"
+          autocomplete="name"
+          required
+          placeholder={qf.fields.fullName.placeholder}
+          aria-describedby="err-fullName"
+          data-err-required={qf.fields.fullName.errorRequired}
+        />
+        <p id="err-fullName" class="form-error" data-error-for="fullName" hidden></p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="quote-company">
+          {qf.fields.company.label}
+          <span class="form-req" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="quote-company"
+          name="company"
+          type="text"
+          class="form-input"
+          autocomplete="organization"
+          required
+          placeholder={qf.fields.company.placeholder}
+          aria-describedby="err-company"
+          data-err-required={qf.fields.company.errorRequired}
+        />
+        <p id="err-company" class="form-error" data-error-for="company" hidden></p>
+      </div>
+    </div>
+
+    <div class="form-row form-row--two">
+      <div class="form-field">
+        <label class="form-label" for="quote-email">
+          {qf.fields.email.label}
+          <span class="form-req" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="quote-email"
+          name="email"
+          type="email"
+          class="form-input"
+          autocomplete="email"
+          required
+          placeholder={qf.fields.email.placeholder}
+          aria-describedby="err-email"
+          data-err-required={qf.fields.email.errorRequired}
+          data-err-invalid={qf.fields.email.errorInvalid}
+        />
+        <p id="err-email" class="form-error" data-error-for="email" hidden></p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="quote-phone">
+          {qf.fields.phone.label}
+          <span class="form-req" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="quote-phone"
+          name="phone"
+          type="tel"
+          class="form-input"
+          autocomplete="tel"
+          required
+          placeholder={qf.fields.phone.placeholder}
+          aria-describedby="err-phone"
+          data-err-required={qf.fields.phone.errorRequired}
+        />
+        <p id="err-phone" class="form-error" data-error-for="phone" hidden></p>
+      </div>
+    </div>
+
+    <div class="form-row form-row--two">
+      <div class="form-field">
+        <label class="form-label" for="quote-plantLocation">
+          {qf.fields.plantLocation.label}
+          <span class="form-req" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="quote-plantLocation"
+          name="plantLocation"
+          type="text"
+          class="form-input"
+          required
+          placeholder={qf.fields.plantLocation.placeholder}
+          aria-describedby="err-plantLocation"
+          data-err-required={qf.fields.plantLocation.errorRequired}
+        />
+        <p
+          id="err-plantLocation"
+          class="form-error"
+          data-error-for="plantLocation"
+          hidden
+        ></p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="quote-quantity">
+          {qf.fields.quantity.label}
+          <span class="form-opt">{optionalTag}</span>
+        </label>
+        <input
+          id="quote-quantity"
+          name="quantity"
+          type="text"
+          class="form-input"
+          placeholder={qf.fields.quantity.placeholder}
+        />
+      </div>
+    </div>
+
+    <fieldset
+      class="form-fieldset"
+      data-need-group
+      data-err-required={qf.fields.needType.errorRequired}
+      aria-describedby="hint-needType err-needType"
+    >
+      <legend class="form-label">
+        {qf.fields.needType.label}
+        <span class="form-req" aria-hidden="true">*</span>
+      </legend>
+      <p id="hint-needType" class="form-hint">{qf.fields.needType.hint}</p>
+
+      <div class="chip-group">
+        {qf.fields.needType.options.map((option) => (
+          <label class="chip-option">
+            <input
+              type="checkbox"
+              name="needType"
+              value={option.value}
+              class="chip-option__input"
+            />
+            <span class="chip-option__label">{option.label}</span>
+          </label>
+        ))}
+      </div>
+
+      <p id="err-needType" class="form-error" data-error-for="needType" hidden></p>
+    </fieldset>
+
+    <div class="form-field">
+      <label class="form-label" for="quote-details">
+        {qf.fields.details.label}
+        <span class="form-req" aria-hidden="true">*</span>
+      </label>
+      <textarea
+        id="quote-details"
+        name="details"
+        rows="5"
+        class="form-textarea"
+        required
+        placeholder={qf.fields.details.placeholder}
+        aria-describedby="note-drawing err-details"
+        data-err-required={qf.fields.details.errorRequired}
+      ></textarea>
+      <p id="note-drawing" class="form-hint">{qf.drawingNote}</p>
+      <p id="err-details" class="form-error" data-error-for="details" hidden></p>
+    </div>
+
+    <div class="form-submit-row">
+      <button type="submit" class="submit-btn" data-submit-btn>
+        <span class="submit-btn__content">
+          <span data-submit-label>{qf.submitButton}</span>
+          <Icon name="arrow-right" size={18} class="submit-btn__arrow" />
+        </span>
+      </button>
+    </div>
+  </form>
+
+  <aside class="quote-sidebar" aria-label={qf.sidebar.heading}>
+    <div class="wa-panel surface-dark" data-theme="dark">
+      <h2 class="wa-panel__title">{qf.sidebar.whatsappHeading}</h2>
+      <p class="wa-panel__body">{qf.sidebar.whatsappBody}</p>
+
+      {whatsappHref ? (
+        <Button href={whatsappHref} variant="primary" surface="dark" external fullWidth>
+          {qf.sidebar.whatsappButton}
+        </Button>
+      ) : (
+        <div class="wa-panel__placeholder">
+          <p class="wa-panel__placeholder-code">
+            {companyData.contact.whatsappNumber}
+          </p>
+          <p class="wa-panel__placeholder-note">
+            {copy.common.whatsappUnavailableNote}
+          </p>
+        </div>
+      )}
+    </div>
+
+    <div class="side-card">
+      <h2 class="side-card__heading">{qf.sidebar.contactHeading}</h2>
+      <dl class="side-contact-list">
+        <div class="side-contact-list__row">
+          <dt>
+            <Icon name="map-pin" size={16} />
+            <span>{qf.sidebar.addressLabel}</span>
+          </dt>
+          <dd>{addressFull}</dd>
+        </div>
+
+        <div class="side-contact-list__row">
+          <dt>
+            <Icon name="clock" size={16} />
+            <span>{qf.sidebar.hoursLabel}</span>
+          </dt>
+          <dd>{companyData.workingHours[lang]}</dd>
+        </div>
+
+        <div class="side-contact-list__row">
+          <dt>
+            <Icon name="phone" size={16} />
+            <span>{qf.sidebar.phoneLabel}</span>
+          </dt>
+          <dd>
+            {hasPhone ? (
+              <a href={`tel:${companyData.contact.phoneHref}`} class="side-contact-link">
+                {companyData.contact.phoneDisplay}
+              </a>
+            ) : (
+              <span class="side-contact-placeholder">
+                {companyData.contact.phoneDisplay}
+              </span>
+            )}
+          </dd>
+        </div>
+
+        <div class="side-contact-list__row">
+          <dt>
+            <Icon name="mail" size={16} />
+            <span>{qf.sidebar.emailLabel}</span>
+          </dt>
+          <dd>
+            {hasEmail ? (
+              <a href={`mailto:${companyData.contact.email}`} class="side-contact-link">
+                {companyData.contact.email}
+              </a>
+            ) : (
+              <span class="side-contact-placeholder">
+                {companyData.contact.email}
+              </span>
+            )}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="side-card side-card--checklist">
+      <h2 class="side-card__heading">{qf.sidebar.checklistHeading}</h2>
+      <ul class="side-checklist">
+        {qf.sidebar.checklist.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script>
+  import '../scripts/quote-form';
+</script>
+
+<style>
+  .quote-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .quote-grid {
+      grid-template-columns: minmax(0, 1.32fr) minmax(300px, 0.78fr);
+      gap: var(--space-8);
+    }
+  }
+
+  .quote-form {
+    padding: clamp(1.35rem, 3vw, 2.5rem);
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  /* JANGAN UBAH: Menyembunyikan kolom honeypot dari layar tanpa mengganggu pembaca layar. */
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form-status {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--color-border-light-strong);
+    background-color: var(--color-bg-light);
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .form-status[hidden] {
+    display: none;
+  }
+
+  .form-status[data-state='success'] {
+    background-color: var(--color-success-bg);
+    border-color: var(--color-success-border);
+    color: var(--color-success-text);
+  }
+
+  .form-status[data-state='error'] {
+    background-color: var(--color-error-bg);
+    border-color: var(--color-error-border);
+    color: var(--color-error-text);
+  }
+
+  .form-status__title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+
+  .form-status__body {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+  }
+
+  .form-status__body:empty {
+    display: none;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 680px) {
+    .form-row--two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .form-field {
+    display: grid;
+    gap: 0.45rem;
+    align-content: start;
+  }
+
+  .form-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-text-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .form-req {
+    color: var(--color-accent-on-light);
+  }
+
+  .form-opt {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--color-text-dark-muted);
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.7rem 0.9rem;
+    background-color: #ffffff;
+    color: var(--color-text-dark);
+    border: 1.5px solid var(--color-border-light-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    line-height: 1.4;
+    transition: border-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .form-textarea {
+    min-height: 136px;
+    resize: vertical;
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--color-text-dark-muted);
+    opacity: 0.85;
+  }
+
+  .form-input[aria-invalid='true'],
+  .form-textarea[aria-invalid='true'] {
+    border-color: var(--color-error-border);
+    background-color: var(--color-error-bg);
+  }
+
+  .form-fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .form-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding-top: 0.2rem;
+  }
+
+  .chip-option {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+  }
+
+  .chip-option__input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+  }
+
+  .chip-option__label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--tap-min);
+    padding: 0.55rem 1.05rem;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--color-border-light-strong);
+    background-color: var(--color-bg-light);
+    color: var(--color-text-dark);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    transition:
+      background-color var(--dur-fast) var(--ease-standard),
+      border-color var(--dur-fast) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard),
+      transform var(--dur-fast) var(--ease-press);
+  }
+
+  .chip-option__input:checked + .chip-option__label {
+    background-color: var(--color-bg-dark);
+    border-color: var(--color-bg-dark);
+    color: var(--color-text-light);
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+
+  .chip-option__input:focus-visible + .chip-option__label {
+    outline: 3px solid var(--color-accent-on-light);
+    outline-offset: 3px;
+  }
+
+  .chip-option__label:active {
+    transform: scale(0.98);
+  }
+
+  @media (hover: hover) {
+    .chip-option__label:hover {
+      border-color: var(--color-text-dark);
+    }
+  }
+
+  .form-error {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-error-text);
+  }
+
+  .form-error[hidden] {
+    display: none;
+  }
+
+  .form-submit-row {
+    padding-top: var(--space-2);
+  }
+
+  .submit-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0.85rem 1.6rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-accent);
+    color: var(--color-accent-ink);
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 700;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform var(--dur-fast) var(--ease-press);
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: var(--color-accent-hover);
+    transform: translateX(-101%);
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  .submit-btn__content {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .submit-btn__arrow {
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  @media (hover: hover) {
+    .submit-btn:hover:not(:disabled)::before {
+      transform: translateX(0);
+    }
+
+    .submit-btn:hover:not(:disabled) .submit-btn__arrow {
+      transform: translateX(4px);
+    }
+  }
+
+  .submit-btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+
+  /* Panel samping informasi bengkel dan jalur WhatsApp */
+  .quote-sidebar {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .wa-panel {
+    padding: var(--space-5);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-dark);
+    border-top: 3px solid var(--color-accent);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .wa-panel__title {
+    font-size: var(--text-xl);
+    color: var(--color-text-light);
+  }
+
+  .wa-panel__body {
+    font-size: var(--text-sm);
+    color: var(--color-text-light-muted);
+  }
+
+  .wa-panel__placeholder {
+    padding: var(--space-4);
+    background-color: var(--color-surface-dark);
+    border: 1px dashed var(--color-border-dark-strong);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .wa-panel__placeholder-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .wa-panel__placeholder-note {
+    font-size: var(--text-xs);
+    color: var(--color-text-light-muted);
+  }
+
+  .side-card {
+    padding: var(--space-5);
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .side-card__heading {
+    font-size: var(--text-lg);
+    color: var(--color-text-dark);
+  }
+
+  .side-contact-list {
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .side-contact-list__row {
+    display: grid;
+    gap: 0.25rem;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .side-contact-list__row dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text-dark-muted);
+  }
+
+  .side-contact-list__row dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-dark);
+    font-weight: 500;
+  }
+
+  .side-contact-link {
+    color: var(--color-accent-on-light);
+    font-weight: 600;
+  }
+
+  .side-contact-placeholder {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: var(--text-xs);
+    color: var(--color-text-dark-muted);
+  }
+
+  .side-checklist {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.65rem;
+    font-size: var(--text-sm);
+    color: var(--color-text-dark-muted);
+    line-height: var(--leading-normal);
+  }
+</style>

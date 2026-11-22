@@ -1,0 +1,28 @@
+---
+/*
+PANDUAN EDIT
+File: src/pages/wawasan/[slug].astro
+Fungsi: Membangun 3 halaman statis detail artikel Wawasan bahasa Indonesia (/wawasan/<slug>/) secara otomatis dari src/data/insights.ts.
+Boleh diedit: Tidak perlu diubah untuk menyunting isi artikel.
+Jangan diubah: Fungsi getStaticPaths agar Astro menghasilkan seluruh halaman artikel secara statis.
+Cara mengedit: Ubah atau tambah artikel melalui src/data/insights.ts (dan daftarkan slug baru di src/i18n/routes.ts).
+*/
+
+import InsightDetailPage from '../../templates/InsightDetailPage.astro';
+import { insightsData, type InsightItem } from '../../data/insights';
+
+export function getStaticPaths() {
+  return insightsData.map((insight) => ({
+    params: { slug: insight.slug.id },
+    props: { insight },
+  }));
+}
+
+interface Props {
+  insight: InsightItem;
+}
+
+const { insight } = Astro.props;
+---
+
+<InsightDetailPage lang="id" insight={insight} />

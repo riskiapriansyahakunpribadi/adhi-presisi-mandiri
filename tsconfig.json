@@ -1,0 +1,13 @@
+/*
+PANDUAN EDIT
+File: tsconfig.json
+Fungsi: Mengatur pemeriksaan tipe TypeScript untuk seluruh file Astro dan skrip proyek.
+Boleh diedit: Tidak ada bagian yang perlu diubah untuk penggunaan normal.
+Jangan diubah: Seluruh pengaturan agar Astro mengenali tipe bawaan dan jalur impor.
+Cara mengedit: Biarkan sesuai bawaan proyek.
+*/
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}
